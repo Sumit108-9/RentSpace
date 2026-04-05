@@ -9,40 +9,25 @@ import toast from 'react-hot-toast';
 
 const Wishlist = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, wishlist, setWishlist, removeFromWishlist } = useStore();
+  const { wishlist, removeFromWishlist } = useStore();
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [mode, setMode] = useState('rent');
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    fetchWishlist();
-  }, [isAuthenticated, navigate]);
-
-  const fetchWishlist = async () => {
-    try {
-      const res = await api.get('/auth/me');
-      setWishlist(res.data.user.wishlist || []);
-      setProducts(res.data.user.wishlist || []);
-    } catch (error) {
-      toast.error('Failed to load wishlist');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    // Use wishlist from store directly (full product objects)
+    setProducts(wishlist);
+    setIsLoading(false);
+  }, [wishlist]);
 
   const handleRemove = async (productId) => {
-    try {
-      await api.delete(`/users/wishlist/${productId}`);
-      removeFromWishlist(productId);
-      setProducts(products.filter(p => p._id !== productId));
-      toast.success('Removed from wishlist');
-    } catch (error) {
-      toast.error('Failed to remove from wishlist');
-    }
+    // Remove locally first (optimistic UI)
+    removeFromWishlist(productId);
+    setProducts(products.filter(p => p._id !== productId));
+    toast.success('Removed from wishlist');
+    
+    // Try API in background (non-blocking)
+    api.delete(`/users/wishlist/${productId}`).catch(() => {});
   };
 
   if (isLoading) return <LoadingSpinner fullScreen />;

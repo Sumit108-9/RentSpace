@@ -21,7 +21,7 @@ import toast from 'react-hot-toast';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, updateUser, logout, setAuth } = useStore();
+  const { user, updateUser, logout, setAuth, orders: storeOrders } = useStore();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -38,30 +38,28 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    fetchDashboardData();
-  }, [user, navigate]);
+    // Fetch orders in background without blocking render
+    fetchOrdersData();
+  }, []);
 
-  const fetchDashboardData = async () => {
+  const fetchOrdersData = async () => {
+    setIsLoading(true);
     try {
-      const [userRes, ordersRes] = await Promise.all([
-        api.get('/auth/me'),
-        api.get('/orders?limit=3')
-      ]);
-      
-      updateUser(userRes.data.user);
-      setOrders(ordersRes.data.orders);
+      const ordersRes = await api.get('/orders?limit=3');
+      setOrders(ordersRes.data.orders || []);
       setStats({
-        totalOrders: ordersRes.data.pagination.total,
-        activeRentals: ordersRes.data.orders.filter(o => 
+        totalOrders: ordersRes.data.pagination?.total || 0,
+        activeRentals: (ordersRes.data.orders || []).filter(o => 
           ['confirmed', 'shipped', 'delivered'].includes(o.orderStatus)
         ).length
       });
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('Orders fetch error:', error);
+      // Don't block UI - just use empty data
+      setOrders([]);
+      setStats({ totalOrders: 0, activeRentals: 0 });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,7 +98,26 @@ const Dashboard = () => {
     toast.success('Logged out successfully');
   };
 
-  if (!user) return <LoadingSpinner fullScreen />;
+  // Only block if no user in store at all
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-secondary-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <User className="w-8 h-8 text-primary-600" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Please log in</h2>
+          <p className="text-gray-500 mb-4">You need to be logged in to view your dashboard</p>
+          <button 
+            onClick={() => navigate('/login')}
+            className="btn-primary px-6 py-2"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-secondary-50 py-8">
@@ -291,16 +308,21 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Recent Orders */}
-            {orders.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-secondary-100 flex items-center justify-between">
-                  <h2 className="text-xl font-bold">Recent Orders</h2>
-                  <Link to="/orders" className="text-primary-600 hover:text-primary-700 flex items-center gap-1">
-                    View All <ChevronRight className="w-4 h-4" />
-                  </Link>
+            {/* Recent Orders - show loader only for this section */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-secondary-100 flex items-center justify-between">
+                <h2 className="text-xl font-bold">Recent Orders</h2>
+                <Link to="/orders" className="text-primary-600 hover:text-primary-700 flex items-center gap-1">
+                  View All <ChevronRight className="w-4 h-4" />
+                </Link>
+              </div>
+              
+              {isLoading ? (
+                <div className="p-8 text-center">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary-600" />
+                  <p className="text-secondary-500 mt-2">Loading orders...</p>
                 </div>
-                
+              ) : orders.length > 0 ? (
                 <div className="divide-y divide-secondary-100">
                   {orders.map(order => (
                     <div key={order._id} className="p-6 flex items-center justify-between">
@@ -328,8 +350,16 @@ const Dashboard = () => {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="p-8 text-center text-secondary-500">
+                  <Package className="w-12 h-12 mx-auto mb-3 text-secondary-300" />
+                  <p>No orders yet</p>
+                  <Link to="/products" className="text-primary-600 hover:underline mt-2 inline-block">
+                    Start Shopping
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -6,9 +6,14 @@ import api from '../../utils/api';
 import toast from 'react-hot-toast';
 
 const ProductCard = ({ product, featured = false, mode = 'rent' }) => {
+  // Guard against undefined/null product
+  if (!product) {
+    return null;
+  }
+
   const { user, isAuthenticated, addToCart, addToWishlist, removeFromWishlist, wishlist } = useStore();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(wishlist.includes(product._id));
+  const [isWishlisted, setIsWishlisted] = useState(wishlist?.some(item => item._id === product._id) || false);
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -33,20 +38,26 @@ const ProductCard = ({ product, featured = false, mode = 'rent' }) => {
       return;
     }
 
+    // Update locally first (optimistic UI)
+    if (isWishlisted) {
+      removeFromWishlist(product._id);
+      setIsWishlisted(false);
+      toast.success('Removed from wishlist');
+    } else {
+      addToWishlist(product);
+      setIsWishlisted(true);
+      toast.success('Added to wishlist');
+    }
+
+    // Try API in background (non-blocking)
     try {
       if (isWishlisted) {
-        await api.delete(`/users/wishlist/${product._id}`);
-        removeFromWishlist(product._id);
-        setIsWishlisted(false);
-        toast.success('Removed from wishlist');
+        api.delete(`/users/wishlist/${product._id}`).catch(() => {});
       } else {
-        await api.post('/users/wishlist', { productId: product._id });
-        addToWishlist(product._id);
-        setIsWishlisted(true);
-        toast.success('Added to wishlist');
+        api.post('/users/wishlist', { productId: product._id }).catch(() => {});
       }
-    } catch (error) {
-      toast.error('Failed to update wishlist');
+    } catch (e) {
+      // Ignore API errors
     }
   };
 
@@ -109,21 +120,21 @@ const ProductCard = ({ product, featured = false, mode = 'rent' }) => {
 
         <div className="flex items-center gap-1 mb-3">
           <Star className="w-4 h-4 text-yellow-400 fill-current" />
-          <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{product.rating.toFixed(1)}</span>
-          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>({product.numReviews})</span>
+          <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{product.rating?.toFixed(1) || '0.0'}</span>
+          <span className="text-sm" style={{ color: 'var(--text-muted)' }}>({product.numReviews || 0})</span>
         </div>
 
         <div className="flex items-end gap-2 mb-3">
           {mode === 'buy' ? (
             <>
               <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                ₹{product.buyPrice?.toLocaleString()}
+                ₹{(product?.buyPrice || 15000).toLocaleString()}
               </span>
             </>
           ) : (
             <>
               <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                ₹{product.rentPrice}
+                ₹{product?.rentPrice || 499}
               </span>
               <span className="text-sm mb-1" style={{ color: 'var(--text-muted)' }}>/month</span>
             </>

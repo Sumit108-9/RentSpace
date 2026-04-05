@@ -27,7 +27,7 @@ const Cart = () => {
   const handleCheckout = () => {
     if (!isAuthenticated) {
       toast.error('Please login to proceed');
-      navigate('/login');
+      navigate('/login', { state: { from: '/checkout' } });
       return;
     }
     if (cart.length === 0) {

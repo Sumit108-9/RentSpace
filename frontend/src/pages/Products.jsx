@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, Filter, X, ChevronDown, Grid3X3, List } from 'lucide-react';
 import { productApi } from '../utils/api';
@@ -7,24 +7,33 @@ import ProductCard from '../components/common/ProductCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const Products = () => {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const urlCategory = queryParams.get('category');
+
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [mode, setMode] = useState('rent');
   const [pagination, setPagination] = useState({});
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
 
   const [filters, setFilters] = useState({
-    category: searchParams.get('category') || '',
-    search: searchParams.get('search') || '',
-    minPrice: searchParams.get('minPrice') || '',
-    maxPrice: searchParams.get('maxPrice') || '',
-    minRating: searchParams.get('minRating') || '',
-    sort: searchParams.get('sort') || 'newest',
-    page: parseInt(searchParams.get('page')) || 1
+    category: urlCategory || '',
+    search: '',
+    minPrice: '',
+    maxPrice: '',
+    minRating: '',
+    sort: '',
+    page: 1
   });
+
+  console.log('URL Category:', urlCategory);
+  console.log('Products:', products);
+  console.log('Mode:', mode);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -45,12 +54,8 @@ const Products = () => {
         const params = new URLSearchParams();
         if (filters.category) params.append('category', filters.category);
         if (filters.search) params.append('search', filters.search);
-        if (filters.minPrice) {
-          products = products.filter(p => (mode === 'buy' ? p.buyPrice : p.rentPrice) >= filters.minPrice);
-        }
-        if (filters.maxPrice) {
-          products = products.filter(p => (mode === 'buy' ? p.buyPrice : p.rentPrice) <= filters.maxPrice);
-        }
+        if (filters.minPrice) params.append('minPrice', filters.minPrice);
+        if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
         if (filters.minRating) params.append('minRating', filters.minRating);
         if (filters.sort) params.append('sort', filters.sort);
         params.append('page', filters.page);
@@ -299,8 +304,8 @@ const Products = () => {
             {/* Products Grid */}
             {isLoading ? (
               <LoadingSpinner />
-            ) : products.length === 0 ? (
-              <div className="text-center py-16 bg-surface rounded-xl border border-theme">
+            ) : !products || products.length === 0 ? (
+              <div className="text-center py-12">
                 <p className="text-theme-muted text-lg">No products found</p>
                 <button
                   onClick={clearFilters}
@@ -312,15 +317,17 @@ const Products = () => {
             ) : (
               <>
                 <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                  {products.map((product, index) => (
-                    <motion.div
-                      key={product._id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <ProductCard product={product} mode={mode} />
-                    </motion.div>
+                  {products?.map((product, index) => (
+                    product && (
+                      <motion.div
+                        key={product?._id || index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <ProductCard product={product} mode={mode} />
+                      </motion.div>
+                    )
                   ))}
                 </div>
 

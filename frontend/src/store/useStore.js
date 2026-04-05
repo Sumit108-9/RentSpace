@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+let setRehydratedFn = null;
+
 const useStore = create(
   persist(
     (set, get) => ({
@@ -8,6 +10,7 @@ const useStore = create(
       user: null,
       token: null,
       isAuthenticated: false,
+      hasRehydrated: false,
       
       setAuth: (user, token) => set({
         user,
@@ -20,6 +23,8 @@ const useStore = create(
         token: null,
         isAuthenticated: false
       }),
+
+      setHasRehydrated: () => set({ hasRehydrated: true }),
       
       updateUser: (userData) => set((state) => ({
         user: { ...state.user, ...userData }
@@ -114,17 +119,32 @@ const useStore = create(
       
       setWishlist: (wishlist) => set({ wishlist }),
       
-      addToWishlist: (productId) => set((state) => ({
-        wishlist: [...state.wishlist, productId]
-      })),
+      addToWishlist: (product) => set((state) => {
+        // Avoid duplicates
+        const exists = state.wishlist.find(item => item._id === product._id);
+        if (exists) return { wishlist: state.wishlist };
+        return { wishlist: [product, ...state.wishlist] };
+      }),
       
       removeFromWishlist: (productId) => set((state) => ({
-        wishlist: state.wishlist.filter(id => id !== productId)
+        wishlist: state.wishlist.filter(item => item._id !== productId)
       })),
 
-      // UI State
-      isLoading: false,
-      setIsLoading: (isLoading) => set({ isLoading }),
+      // Orders State
+      orders: [],
+      
+      addOrder: (order) => set((state) => ({
+        orders: [order, ...state.orders]
+      })),
+      
+      updateOrder: (orderId, updates) => set((state) => ({
+        orders: state.orders.map(o => o._id === orderId ? { ...o, ...updates } : o)
+      })),
+      
+      getOrderById: (orderId) => {
+        const { orders } = get();
+        return orders.find(o => o._id === orderId);
+      },
     }),
     {
       name: 'rentspace-storage',
@@ -133,10 +153,30 @@ const useStore = create(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         cart: state.cart,
-        wishlist: state.wishlist
-      })
+        wishlist: state.wishlist,
+        orders: state.orders
+      }),
+      onRehydrateStorage: (state) => {
+        // This runs after rehydration completes
+        return () => {
+          useStore.getState().setHasRehydrated();
+        };
+      },
+      skipHydration: false
     }
   )
 );
 
 export default useStore;
+
+// Set up the rehydration callback after store creation
+setRehydratedFn = () => useStore.getState().setHasRehydrated();
+
+// SAFETY: Force hasRehydrated after 3 seconds if callback doesn't fire
+setTimeout(() => {
+  const state = useStore.getState();
+  if (!state.hasRehydrated) {
+    console.log('Store safety: forcing hasRehydrated');
+    state.setHasRehydrated();
+  }
+}, 3000);

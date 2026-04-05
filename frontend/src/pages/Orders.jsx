@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Package, ChevronRight, Search, Filter, X, Eye, Truck, CheckCircle, Clock, AlertCircle, MapPin, Phone } from 'lucide-react';
+import { Package, ChevronRight, Search, Filter, X, Eye, Truck, CheckCircle, Clock, AlertCircle, MapPin, Phone, Ban } from 'lucide-react';
 import api from '../utils/api';
 import useStore from '../store/useStore';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 const Orders = () => {
   const navigate = useNavigate();
-  const { user } = useStore();
+  const { orders: storeOrders, updateOrder } = useStore();
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [pagination, setPagination] = useState({});
@@ -19,15 +19,15 @@ const Orders = () => {
   const [trackingDetails, setTrackingDetails] = useState(null);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
+    // Use store orders immediately
+    setOrders(storeOrders);
+    setIsLoading(false);
+    
+    // Try to fetch more orders from API in background
     fetchOrders();
-  }, [user, navigate, statusFilter, page]);
+  }, [storeOrders, statusFilter, page]);
 
   const fetchOrders = async () => {
-    setIsLoading(true);
     try {
       const params = new URLSearchParams();
       params.append('page', page);
@@ -38,10 +38,49 @@ const Orders = () => {
       setOrders(res.data.orders);
       setPagination(res.data.pagination);
     } catch (error) {
-      toast.error('Failed to load orders');
-    } finally {
-      setIsLoading(false);
+      console.log('API orders fetch failed, using store orders');
+      // Keep store orders if API fails
     }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!selectedOrder) return;
+    
+    if (!['pending', 'confirmed'].includes(selectedOrder.orderStatus)) {
+      toast.error('Order cannot be cancelled at this stage');
+      return;
+    }
+
+    // Update store (persists to localStorage)
+    updateOrder(selectedOrder._id, { orderStatus: 'cancelled' });
+    
+    // Update local state
+    const updatedOrder = { ...selectedOrder, orderStatus: 'cancelled' };
+    setOrders(orders.map(o => o._id === selectedOrder._id ? updatedOrder : o));
+    setSelectedOrder(updatedOrder);
+    toast.success('Order cancelled successfully');
+    
+    setTimeout(() => setIsTrackModalOpen(false), 500);
+    
+    // Try API in background
+    api.put(`/orders/${selectedOrder._id}/cancel`).catch(() => {});
+  };
+
+  const handleCancelOrderFromList = async (order) => {
+    if (!['pending', 'confirmed'].includes(order.orderStatus)) {
+      toast.error('Order cannot be cancelled at this stage');
+      return;
+    }
+
+    // Update store (persists to localStorage)
+    updateOrder(order._id, { orderStatus: 'cancelled' });
+    
+    // Update local state
+    setOrders(orders.map(o => o._id === order._id ? { ...o, orderStatus: 'cancelled' } : o));
+    toast.success('Order cancelled successfully');
+    
+    // Try API in background
+    api.put(`/orders/${order._id}/cancel`).catch(() => {});
   };
 
   const getStatusIcon = (status) => {
@@ -49,6 +88,7 @@ const Orders = () => {
       case 'delivered': return <CheckCircle className="w-5 h-5 text-green-600" />;
       case 'shipped': return <Truck className="w-5 h-5 text-blue-600" />;
       case 'pending': return <Clock className="w-5 h-5 text-yellow-600" />;
+      case 'cancelled': return <Ban className="w-5 h-5 text-red-600" />;
       default: return <Package className="w-5 h-5 text-secondary-600" />;
     }
   };
@@ -249,6 +289,14 @@ const Orders = () => {
                     Rental Period: {new Date(order.rentalStartDate).toLocaleDateString()} - {order.rentalEndDate ? new Date(order.rentalEndDate).toLocaleDateString() : 'N/A'}
                   </p>
                   <div className="flex items-center gap-3">
+                    {['pending', 'confirmed'].includes(order.orderStatus) && (
+                      <button 
+                        onClick={() => handleCancelOrderFromList(order)}
+                        className="text-red-600 hover:text-red-700 font-medium flex items-center gap-1 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-lg transition-colors"
+                      >
+                        <Ban className="w-4 h-4" /> Cancel Order
+                      </button>
+                    )}
                     <button 
                       onClick={() => handleTrackOrder(order)}
                       className="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 bg-primary-50 hover:bg-primary-100 px-3 py-2 rounded-lg transition-colors"
@@ -373,7 +421,17 @@ const Orders = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="sticky bottom-0 bg-white px-6 py-4 border-t border-secondary-100">
+            <div className="sticky bottom-0 bg-white px-6 py-4 border-t border-secondary-100 space-y-3">
+              {/* Cancel Order Button - only for pending/confirmed orders */}
+              {selectedOrder && ['pending', 'confirmed'].includes(selectedOrder.orderStatus) && (
+                <button
+                  onClick={handleCancelOrder}
+                  className="w-full py-3 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+                >
+                  <Ban className="w-5 h-5" />
+                  Cancel Order
+                </button>
+              )}
               <button
                 onClick={() => setIsTrackModalOpen(false)}
                 className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors"

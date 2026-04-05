@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import ProductCard from './ProductCard';
 
 const ProductCarousel = ({ products, title, subtitle, mode = 'rent' }) => {
   const [currentIndex, setCurrentIndex] = useState(0);

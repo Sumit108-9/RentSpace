@@ -69,10 +69,10 @@ export const productApi = {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Only handle 401 - don't auto-redirect, let components handle it
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      console.warn('API returned 401 - auth may be invalid');
+      // Don't clear storage or redirect here - let ProtectedRoute handle it
     }
     return Promise.reject(error);
   }
