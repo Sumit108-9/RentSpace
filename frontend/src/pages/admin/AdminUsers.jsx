@@ -1,191 +1,134 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  Users, 
-  Search,
-  Mail,
-  Phone,
-  Shield
-} from 'lucide-react';
-import api from '../../utils/api';
+import { Users, UserCheck, Mail, Search } from 'lucide-react';
 import useStore from '../../store/useStore';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import toast from 'react-hot-toast';
 
 const AdminUsers = () => {
-  const navigate = useNavigate();
-  const { user } = useStore();
   const [users, setUsers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [pagination, setPagination] = useState({});
-  const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+
+  const getToken = () => useStore.getState().token || localStorage.getItem('token');
 
   useEffect(() => {
-    if (!user || user.role !== 'admin') {
-      navigate('/');
-      toast.error('Access denied');
-      return;
-    }
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/api/admin/users', { headers: { Authorization: `Bearer ${getToken()}` } });
+        const data = await res.json();
+        if (data.success) setUsers(data.users || []);
+      } catch (e) {}
+      setLoading(false);
+    };
     fetchUsers();
-  }, [user, navigate, page]);
+  }, []);
 
-  const fetchUsers = async () => {
-    try {
-      const res = await api.get(`/users?page=${page}&limit=10`);
-      setUsers(res.data.users);
-      setPagination(res.data.pagination);
-    } catch (error) {
-      toast.error('Failed to load users');
-    } finally {
-      setIsLoading(false);
+  const filtered = users.filter(u => {
+    if (roleFilter !== 'all' && u.role !== roleFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      if (!u.name?.toLowerCase().includes(q) && !u.email?.toLowerCase().includes(q)) return false;
     }
-  };
+    return true;
+  });
 
-  const toggleRole = async (userId, currentRole) => {
-    try {
-      const newRole = currentRole === 'admin' ? 'user' : 'admin';
-      await api.put(`/users/${userId}`, { role: newRole });
-      toast.success(`User role updated to ${newRole}`);
-      fetchUsers();
-    } catch (error) {
-      toast.error('Failed to update user role');
-    }
-  };
+  const totalUsers = users.length;
+  const verifiedCount = users.filter(u => u.isEmailVerified).length;
+  const adminCount = users.filter(u => u.role === 'admin').length;
 
-  const filteredUsers = users.filter(u => 
-    u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const statCards = [
+    { icon: Users, label: 'Total Customers', value: totalUsers, color: '#1D9E75' },
+    { icon: UserCheck, label: 'Verified', value: verifiedCount, color: '#085041' },
+    { icon: Mail, label: 'Unverified', value: totalUsers - verifiedCount, color: '#92400E' },
+  ];
 
-  if (isLoading) return <LoadingSpinner fullScreen />;
+  const inputStyle = { width: '100%', padding: '12px 14px', border: '0.5px solid #e8e6df', borderRadius: 8, fontSize: 15, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' };
 
   return (
-    <div className="min-h-screen bg-secondary-50 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-secondary-900 text-white flex-shrink-0 hidden lg:block">
-        <div className="p-6">
-          <Link to="/" className="text-2xl font-bold">RentSpace</Link>
-          <p className="text-secondary-400 text-sm">Admin Panel</p>
-        </div>
-        <nav className="px-4 pb-4">
-          <Link to="/admin" className="flex items-center gap-3 px-4 py-3 text-secondary-300 hover:bg-secondary-800 hover:text-white rounded-lg mb-1">
-            <LayoutDashboard className="w-5 h-5" /> Dashboard
-          </Link>
-          <Link to="/admin/products" className="flex items-center gap-3 px-4 py-3 text-secondary-300 hover:bg-secondary-800 hover:text-white rounded-lg mb-1">
-            <Package className="w-5 h-5" /> Products
-          </Link>
-          <Link to="/admin/orders" className="flex items-center gap-3 px-4 py-3 text-secondary-300 hover:bg-secondary-800 hover:text-white rounded-lg mb-1">
-            <ShoppingCart className="w-5 h-5" /> Orders
-          </Link>
-          <Link to="/admin/users" className="flex items-center gap-3 px-4 py-3 bg-primary-600 text-white rounded-lg mb-1">
-            <Users className="w-5 h-5" /> Users
-          </Link>
-        </nav>
-      </aside>
+    <div>
+      <div style={{ fontSize: 30, fontWeight: 700, marginBottom: 24, color: '#2C2C2A', fontFamily: "'Playfair Display', serif" }}>Customers</div>
 
-      {/* Main Content */}
-      <main className="flex-1 p-8">
-        <h1 className="text-3xl font-bold mb-8">Users</h1>
-
-        <div className="bg-white rounded-xl shadow-sm">
-          <div className="p-6 border-b border-secondary-100">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-secondary-200 rounded-lg"
-              />
+      {/* Stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 24 }}>
+        {statCards.map((s, idx) => {
+          const Icon = s.icon;
+          return (
+            <div key={idx} style={{ background: '#fff', border: '0.5px solid #E8E6DF', borderRadius: 12, padding: '20px 28px', display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 10, background: '#E1F5EE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon style={{ width: 22, height: 22, stroke: s.color, fill: 'none' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: 14, color: '#888780', marginBottom: 4 }}>{s.label}</div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: '#2C2C2A' }}>{loading ? '—' : s.value}</div>
+              </div>
             </div>
-          </div>
+          );
+        })}
+      </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-secondary-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-secondary-500">User</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-secondary-500">Contact</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-secondary-500">Joined</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-secondary-500">Role</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-secondary-500">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-secondary-100">
-                {filteredUsers.map(u => (
-                  <tr key={u._id} className="hover:bg-secondary-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                          <span className="font-semibold text-primary-600">
-                            {u.name.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium">{u.name}</p>
-                          <p className="text-sm text-secondary-500">{u.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm">
-                        {u.phone && <p className="flex items-center gap-1"><Phone className="w-4 h-4" /> {u.phone}</p>}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      {new Date(u.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
-                        u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-secondary-100 text-secondary-700'
-                      }`}>
-                        <Shield className="w-3 h-3" />
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {u._id !== user._id && (
-                        <button
-                          onClick={() => toggleRole(u._id, u.role)}
-                          className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                        >
-                          {u.role === 'admin' ? 'Make User' : 'Make Admin'}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+        <div style={{ position: 'relative', maxWidth: 320, flex: 1 }}>
+          <Search style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 18, height: 18, stroke: '#888780' }} />
+          <input placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)} style={{ ...inputStyle, paddingLeft: 38 }} />
+        </div>
+        <select value={roleFilter} onChange={e => setRoleFilter(e.target.value)} style={{ ...inputStyle, maxWidth: 160 }}>
+          <option value="all">All Roles</option>
+          <option value="user">Users</option>
+          <option value="admin">Admins</option>
+        </select>
+      </div>
+
+      {/* Count */}
+      <div style={{ fontSize: 14, color: '#888780', marginBottom: 16 }}>{filtered.length} customer{filtered.length !== 1 ? 's' : ''} found</div>
+
+      {/* Table */}
+      <div style={{ background: '#fff', border: '0.5px solid #E8E6DF', borderRadius: 12, overflow: 'hidden' }}>
+        {loading ? (
+          <div style={{ padding: 40, textAlign: 'center', color: '#888780', fontSize: 15 }}>Loading customers...</div>
+        ) : filtered.length === 0 ? (
+          <div style={{ padding: 40, textAlign: 'center', color: '#888780', fontSize: 15 }}>No customers found</div>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                {['CUSTOMER', 'EMAIL', 'PHONE', 'ROLE', 'VERIFIED', 'JOINED'].map(h => (
+                  <th key={h} style={{ textAlign: 'left', padding: '14px 16px', color: '#888780', fontWeight: 500, fontSize: 12, letterSpacing: '0.04em', borderBottom: '0.5px solid #E8E6DF', background: '#FAFAF8' }}>{h}</th>
                 ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          {pagination.pages > 1 && (
-            <div className="flex items-center justify-center gap-2 p-6 border-t border-secondary-100">
-              <button
-                onClick={() => setPage(page - 1)}
-                disabled={page === 1}
-                className="px-4 py-2 border border-secondary-200 rounded-lg disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span>Page {page} of {pagination.pages}</span>
-              <button
-                onClick={() => setPage(page + 1)}
-                disabled={page >= pagination.pages}
-                className="px-4 py-2 border border-secondary-200 rounded-lg disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </div>
-      </main>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(u => (
+                <tr key={u._id} style={{ borderBottom: '0.5px solid #F5F4F0' }}>
+                  <td style={{ padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#E1F5EE', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 600, color: '#085041', flexShrink: 0 }}>
+                        {u.name?.charAt(0)?.toUpperCase() || 'U'}
+                      </div>
+                      <div style={{ fontSize: 15, fontWeight: 500, color: '#2C2C2A' }}>{u.name || 'Unknown'}</div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: '#2C2C2A' }}>{u.email}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: u.phone ? '#2C2C2A' : '#888780' }}>{u.phone || '—'}</td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <span style={{ fontSize: 12, padding: '3px 12px', borderRadius: 20, fontWeight: 500, textTransform: 'capitalize', background: u.role === 'admin' ? '#E0E7FF' : '#E1F5EE', color: u.role === 'admin' ? '#3730A3' : '#085041' }}>
+                      {u.role}
+                    </span>
+                  </td>
+                  <td style={{ padding: '14px 16px' }}>
+                    <span style={{ fontSize: 12, padding: '3px 12px', borderRadius: 20, fontWeight: 500, background: u.isEmailVerified ? '#DCFCE7' : '#FEF3C7', color: u.isEmailVerified ? '#166534' : '#92400E' }}>
+                      {u.isEmailVerified ? 'Yes' : 'No'}
+                    </span>
+                  </td>
+                  <td style={{ padding: '14px 16px', fontSize: 14, color: '#888780' }}>
+                    {new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 };

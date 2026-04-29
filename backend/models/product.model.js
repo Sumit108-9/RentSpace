@@ -23,6 +23,10 @@ const reviewSchema = new mongoose.Schema({
 });
 
 const productSchema = new mongoose.Schema({
+  _id: {
+    type: String,
+    required: true
+  },
   name: {
     type: String,
     required: [true, 'Product name is required'],
@@ -32,6 +36,7 @@ const productSchema = new mongoose.Schema({
   description: {
     type: String,
     required: [true, 'Description is required'],
+    minlength: [5, 'Description must be at least 5 characters'],
     maxlength: [2000, 'Description cannot exceed 2000 characters']
   },
   category: {
@@ -50,11 +55,6 @@ const productSchema = new mongoose.Schema({
   monthlyRent: {
     type: Number,
     required: [true, 'Monthly rent is required'],
-    min: 0
-  },
-  securityDeposit: {
-    type: Number,
-    default: 0,
     min: 0
   },
   originalPrice: {
@@ -116,6 +116,17 @@ const productSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+// Performance indexes
+productSchema.index({ name: 'text', description: 'text' });
+productSchema.index({ category: 1 });
+productSchema.index({ isActive: 1 });
+productSchema.index({ isFeatured: 1 });
+productSchema.index({ monthlyRent: 1 });
+productSchema.index({ rating: -1 });
+productSchema.index({ createdAt: -1 });
+productSchema.index({ category: 1, isActive: 1 });
+productSchema.index({ isActive: 1, isFeatured: 1 });
 
 const Product = mongoose.model('Product', productSchema);
 export default Product;

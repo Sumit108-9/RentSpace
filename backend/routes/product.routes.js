@@ -10,17 +10,23 @@ import {
   addReview
 } from '../controllers/product.controller.js';
 import { protect, adminOnly } from '../middleware/auth.middleware.js';
+import { 
+  validateProductCreation, 
+  validateProductUpdate, 
+  validateProductId,
+  validateReview 
+} from '../middleware/validation.middleware.js';
 
 const router = express.Router();
 
 router.get('/', getProducts);
 router.get('/featured', getFeaturedProducts);
 router.get('/categories', getCategories);
-router.get('/:id', getProductById);
+router.get('/:id', validateProductId, getProductById);
 
-router.post('/', protect, adminOnly, createProduct);
-router.put('/:id', protect, adminOnly, updateProduct);
-router.delete('/:id', protect, adminOnly, deleteProduct);
-router.post('/:id/reviews', protect, addReview);
+router.post('/', protect, adminOnly, validateProductCreation, createProduct);
+router.put('/:id', protect, adminOnly, validateProductUpdate, updateProduct);
+router.delete('/:id', protect, adminOnly, validateProductId, deleteProduct);
+router.post('/:id/reviews', protect, validateReview, addReview);
 
 export default router;

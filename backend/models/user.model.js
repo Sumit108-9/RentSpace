@@ -22,6 +22,17 @@ const userSchema = new mongoose.Schema({
     minlength: [6, 'Password must be at least 6 characters'],
     select: false
   },
+  googleId: {
+    type: String,
+    sparse: true
+  },
+  avatar: {
+    type: String
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
   phone: {
     type: String,
     trim: true
@@ -57,6 +68,10 @@ userSchema.pre('save', async function(next) {
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// Performance indexes (email and googleId already indexed via schema properties: unique/sparse)
+userSchema.index({ role: 1 });
+userSchema.index({ createdAt: -1 });
 
 const User = mongoose.model('User', userSchema);
 export default User;

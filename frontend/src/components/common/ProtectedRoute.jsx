@@ -1,41 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import useStore from '../../store/useStore';
-import LoadingSpinner from './LoadingSpinner';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, user, hasRehydrated } = useStore();
-  const [forceShow, setForceShow] = useState(false);
+  const location = useLocation();
+  const storeToken = useStore((s) => s.token);
+  const hasRehydrated = useStore((s) => s.hasRehydrated);
+  const lsToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const token = storeToken || lsToken;
 
-  // Fallback: force show after 2 seconds max
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      console.log('ProtectedRoute: forceShow triggered');
-      setForceShow(true);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  // Wait for Zustand rehydration to avoid flashing redirect
+  if (!hasRehydrated && lsToken) return null;
 
-  console.log('ProtectedRoute render:', { 
-    isAuthenticated, 
-    hasUser: !!user, 
-    hasRehydrated,
-    forceShow,
-    userId: user?._id 
-  });
-
-  // Show spinner while rehydrating (but max 2 seconds)
-  if (!hasRehydrated && !forceShow) {
-    return <LoadingSpinner fullScreen />;
+  if (!token) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
-
-  // After rehydration or forceShow, check auth
-  if (!isAuthenticated && !user) {
-    console.log('ProtectedRoute: redirecting to login');
-    return <Navigate to="/login" replace />;
-  }
-
-  console.log('ProtectedRoute: rendering children');
   return children;
 };
 

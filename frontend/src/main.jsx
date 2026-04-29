@@ -1,41 +1,21 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-import { Toaster } from 'react-hot-toast'
-import { LocationProvider } from './context/LocationContext'
+import { GoogleOAuthProvider } from '@react-oauth/google'
+import ErrorBoundary from './components/common/ErrorBoundary'
 import App from './App.jsx'
 import './index.css'
 
+const GOOGLE_CLIENT_ID = '586392208753-mtgpbot1njbva32o6m7gojc0j0ms6gs2.apps.googleusercontent.com'
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <LocationProvider>
-        <App />
-        <Toaster 
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#363636',
-              color: '#fff',
-            },
-            success: {
-              duration: 3000,
-              iconTheme: {
-                primary: '#22c55e',
-                secondary: '#fff',
-              },
-            },
-            error: {
-              duration: 4000,
-              iconTheme: {
-                primary: '#ef4444',
-                secondary: '#fff',
-              },
-            },
-          }}
-        />
-      </LocationProvider>
-    </BrowserRouter>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ErrorBoundary>
+    </GoogleOAuthProvider>
   </React.StrictMode>,
 )

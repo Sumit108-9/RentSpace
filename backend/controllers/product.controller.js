@@ -50,9 +50,11 @@ export const getProducts = async (req, res, next) => {
     }
 
     const products = await Product.find(query)
+      .select('name description category subcategory images monthlyRent rating numReviews countInStock features material color isActive isFeatured createdAt')
       .sort(sortOption)
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     const total = await Product.countDocuments(query);
 
@@ -74,7 +76,10 @@ export const getProducts = async (req, res, next) => {
 
 export const getProductById = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id).populate('reviews.user', 'name');
+    const { id } = req.params;
+    
+    // Use findOne with lean to handle string IDs
+    const product = await Product.findOne({ _id: id }).lean();
     
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
@@ -89,8 +94,10 @@ export const getProductById = async (req, res, next) => {
 export const getFeaturedProducts = async (req, res, next) => {
   try {
     const products = await Product.find({ isActive: true, isFeatured: true })
+      .select('name category images monthlyRent rating countInStock')
       .limit(8)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
     
     res.json({ success: true, products });
   } catch (error) {

@@ -1,346 +1,394 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { 
-  Heart, 
-  Share2, 
-  Truck, 
-  Shield, 
-  RotateCcw, 
-  Check, 
-  ChevronRight,
-  Star,
-  Plus,
-  Minus,
-  ArrowLeft
-} from 'lucide-react';
-import api, { productApi } from '../utils/api';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Heart, Check, RotateCcw, Shield, Truck } from 'lucide-react';
 import useStore from '../store/useStore';
-import LoadingSpinner from '../components/common/LoadingSpinner';
-import toast from 'react-hot-toast';
+import { ToastContext } from '../App';
 
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart, isAuthenticated, user, addToWishlist, removeFromWishlist, wishlist } = useStore();
-  
-  const [product, setProduct] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [rentalDuration, setRentalDuration] = useState(3);
+  const toast = useContext(ToastContext);
+
+  const user = useStore((s) => s.user);
+  const addToCartStore = useStore((s) => s.addToCart);
+  const addToWishlist = useStore((s) => s.addToWishlist);
+  const removeFromWishlist = useStore((s) => s.removeFromWishlist);
+  const getUserWishlist = useStore((s) => s.getUserWishlist);
+  const getUserCart = useStore((s) => s.getUserCart);
+
+  // Product from Zustand store
+  const {
+    selectedProduct: product,
+    productsLoading: loading,
+    productError: error,
+    fetchProductById,
+    clearSelectedProduct,
+  } = useStore((state) => ({
+    selectedProduct: state.selectedProduct,
+    productsLoading: state.productsLoading,
+    productError: state.productError,
+    fetchProductById: state.fetchProductById,
+    clearSelectedProduct: state.clearSelectedProduct,
+  }));
+
+  const [selectedMonths, setSelectedMonths] = useState(1);
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
-  const [activeTab, setActiveTab] = useState('description');
+
+  const baseRent = product?.monthlyRent ?? product?.rentPrice ?? 0;
+
+  const getMonthlyPrice = (months) => {
+    if (months >= 18) return Math.round(baseRent * 0.75);
+    if (months >= 12) return Math.round(baseRent * 0.8);
+    if (months >= 6) return Math.round(baseRent * 0.9);
+    if (months >= 3) return Math.round(baseRent * 0.95);
+    return Math.round(baseRent * 1.0);
+  };
+
+  const monthlyPrice = getMonthlyPrice(selectedMonths);
+  const totalPrice = monthlyPrice * selectedMonths;
+
+  const handleMonthChange = (val) => {
+    const n = Math.max(1, Math.min(24, val));
+    setSelectedMonths(n);
+  };
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await productApi.getProductById(id);
-        setProduct(res.data.product);
-        setRentalDuration(res.data.product.minRentalPeriod || 3);
-        setIsWishlisted(wishlist.includes(res.data.product._id));
-      } catch (error) {
-        toast.error('Failed to load product');
-        navigate('/products');
-      } finally {
-        setIsLoading(false);
-      }
+    if (id) {
+      fetchProductById(id);
+    }
+    return () => {
+      clearSelectedProduct();
     };
-    fetchProduct();
-  }, [id, navigate, wishlist]);
+  }, [id, fetchProductById, clearSelectedProduct]);
 
-  const handleAddToCart = () => {
-    if (!isAuthenticated) {
-      toast.error('Please login to add items to cart');
+  const isInWishlist = (() => {
+    if (!user || !product) return false;
+    const wl = getUserWishlist();
+    return wl.some((w) => String(w._id || w.id) === String(product._id || product.id));
+  })();
+
+  const isInCart = (() => {
+    if (!user || !product) return false;
+    const cart = getUserCart();
+    return cart.some((item) => String(item._id || item.id) === String(product._id || product.id));
+  })();
+
+  const [showQuantity, setShowQuantity] = useState(false);
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast?.info('Please sign in to add items to cart');
       navigate('/login');
       return;
     }
-    addToCart(product, rentalDuration, quantity);
-    toast.success('Added to cart');
+    if (!product) return;
+    
+    // Add to local store
+    addToCartStore(product, selectedMonths, quantity);
+    
+    // Sync to backend
+    try {
+      const token = localStorage.getItem('token');
+      await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: product._id || product.id,
+          quantity: quantity,
+          duration: selectedMonths,
+          rentalDuration: selectedMonths
+        })
+      });
+    } catch (err) {
+      // Silent fail - local cart still works
+    }
+    
+    toast?.success(`${product.name} added to cart`);
+    setShowQuantity(true);
   };
 
-  const handleToggleWishlist = async () => {
-    if (!isAuthenticated) {
-      toast.error('Please login to add to wishlist');
+  const handleRentNow = async () => {
+    if (!user) {
+      toast?.info('Please sign in to rent');
+      navigate('/login');
       return;
     }
-
+    if (!product) return;
+    
+    // Add to local store
+    addToCartStore(product, selectedMonths, quantity);
+    
+    // Sync to backend
     try {
-      if (isWishlisted) {
-        await api.delete(`/users/wishlist/${product._id}`);
-        removeFromWishlist(product._id);
-        setIsWishlisted(false);
-        toast.success('Removed from wishlist');
-      } else {
-        await api.post('/users/wishlist', { productId: product._id });
-        addToWishlist(product._id);
-        setIsWishlisted(true);
-        toast.success('Added to wishlist');
-      }
-    } catch (error) {
-      toast.error('Failed to update wishlist');
+      const token = localStorage.getItem('token');
+      await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: product._id || product.id,
+          quantity: quantity,
+          duration: selectedMonths,
+          rentalDuration: selectedMonths
+        })
+      });
+    } catch (err) {
+      // Silent fail - local cart still works
+    }
+    
+    navigate('/checkout');
+  };
+
+  const toggleWishlist = () => {
+    if (!user) {
+      toast?.info('Please sign in to use wishlist');
+      navigate('/login');
+      return;
+    }
+    if (!product) return;
+    const pid = product._id || product.id;
+    if (isInWishlist) {
+      removeFromWishlist(pid);
+      toast?.info('Removed from wishlist');
+    } else {
+      addToWishlist(product);
+      toast?.success('Added to wishlist');
     }
   };
 
-  const totalMonthly = product ? product.monthlyRent * quantity : 0;
-  const totalRent = totalMonthly * rentalDuration;
-  const securityDeposit = product ? (product.securityDeposit || 0) * quantity : 0;
-
-  if (isLoading) return <LoadingSpinner fullScreen />;
-  if (!product) return null;
+  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#888780' }}>Loading...</div>;
+  if (error || !product) {
+    return (
+      <div style={{ padding: 40, textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 12 }}>😕</div>
+        <div style={{ color: '#B91C1C', fontSize: 14, marginBottom: 12 }}>{error || 'Product not found'}</div>
+        <Link to="/products" style={{ color: '#1D9E75', textDecoration: 'none', fontSize: 13 }}>← Back to products</Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-secondary-50 py-8">
-      <div className="container-custom">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-secondary-600 hover:text-primary-600 mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Products
-        </button>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Images */}
-          <div className="space-y-4">
-            <div className="aspect-square bg-white rounded-2xl overflow-hidden shadow-sm">
-              <img
-                src={product.images[selectedImage]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {product.images.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-2">
-                {product.images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImage(idx)}
-                    className={`w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-colors ${
-                      selectedImage === idx ? 'border-primary-600' : 'border-transparent'
-                    }`}
-                  >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
+    <div style={{ maxWidth: 1400, margin: '0 auto', padding: '16px 80px 40px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 40 }}>
+        {/* Left - Images */}
+        <div>
+          {/* Main Image */}
+          <div style={{ width: '100%', height: 500, background: '#F5F4F0', borderRadius: 12, overflow: 'hidden', marginBottom: 20, border: '0.5px solid #E8E6DF' }}>
+            {product.images?.[0] ? 
+              <img src={product.images[0]} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 
+              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 64 }}>
+                {product.category === 'bed' ? '🛏' : product.category === 'table' ? '🍽' : product.category === 'chair' ? '🪑' : '🛋'}
               </div>
-            )}
+            }
+          </div>
+          
+          {/* Thumbnails */}
+          <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{ width: 70, height: 70, background: '#F5F4F0', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: i === 0 ? '2px solid #1D9E75' : '0.5px solid #E8E6DF', fontSize: 24 }}>
+                {product.images?.[i] ? 
+                  <img src={product.images[i]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 6 }} /> :
+                  (product.category === 'bed' ? '🛏' : product.category === 'table' ? '🍽' : product.category === 'chair' ? '🪑' : '🛋')
+                }
+              </div>
+            ))}
           </div>
 
-          {/* Product Info */}
-          <div>
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <span className="text-sm text-primary-600 font-medium uppercase tracking-wide">
-                  {product.category}
-                </span>
-                <h1 className="text-2xl lg:text-3xl font-bold mt-1">{product.name}</h1>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleToggleWishlist}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                    isWishlisted ? 'bg-red-500 text-white' : 'bg-secondary-100 text-secondary-600 hover:bg-secondary-200'
-                  }`}
-                >
-                  <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
-                </button>
-                <button className="w-12 h-12 rounded-full bg-secondary-100 text-secondary-600 hover:bg-secondary-200 flex items-center justify-center">
-                  <Share2 className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                <span className="font-semibold">{product.rating.toFixed(1)}</span>
-              </div>
-              <span className="text-secondary-400">|</span>
-              <span className="text-secondary-600">{product.numReviews} Reviews</span>
-              <span className="text-secondary-400">|</span>
-              <span className={`${product.countInStock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {product.countInStock > 0 ? `${product.countInStock} in stock` : 'Out of stock'}
-              </span>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-              <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-4xl font-bold text-secondary-900">
-                  ₹{product.monthlyRent}
-                </span>
-                <span className="text-secondary-500">/month</span>
-                {product.originalPrice > 0 && (
-                  <span className="text-secondary-400 line-through ml-2">
-                    Buy: ₹{product.originalPrice.toLocaleString()}
-                  </span>
-                )}
-              </div>
-
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Rental Duration (months)</label>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setRentalDuration(Math.max(product.minRentalPeriod || 3, rentalDuration - 1))}
-                      className="w-10 h-10 rounded-lg bg-secondary-100 flex items-center justify-center hover:bg-secondary-200"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="w-16 text-center font-semibold text-lg">{rentalDuration}</span>
-                    <button
-                      onClick={() => setRentalDuration(Math.min(product.maxRentalPeriod || 24, rentalDuration + 1))}
-                      className="w-10 h-10 rounded-lg bg-secondary-100 flex items-center justify-center hover:bg-secondary-200"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                    <span className="text-secondary-500 text-sm">
-                      ({product.minRentalPeriod || 3} - {product.maxRentalPeriod || 24} months)
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Quantity</label>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-10 h-10 rounded-lg bg-secondary-100 flex items-center justify-center hover:bg-secondary-200"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="w-16 text-center font-semibold text-lg">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity(Math.min(product.countInStock, quantity + 1))}
-                      className="w-10 h-10 rounded-lg bg-secondary-100 flex items-center justify-center hover:bg-secondary-200"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-secondary-200 pt-4 mb-6">
-                <div className="flex justify-between mb-2">
-                  <span className="text-secondary-600">Monthly Rent ({quantity} item{quantity > 1 ? 's' : ''})</span>
-                  <span>₹{totalMonthly}/mo</span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-secondary-600">Rental Period</span>
-                  <span>{rentalDuration} months</span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-secondary-600">Security Deposit (refundable)</span>
-                  <span>₹{securityDeposit}</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-secondary-200">
-                  <span className="font-semibold">Total for {rentalDuration} months</span>
-                  <span className="font-bold text-xl text-primary-600">₹{totalRent + securityDeposit}</span>
-                </div>
-              </div>
-
-              <button
-                onClick={handleAddToCart}
-                disabled={product.countInStock === 0}
-                className="w-full btn-primary py-4 text-lg"
-              >
-                {product.countInStock === 0 ? 'Out of Stock' : 'Add to Cart'}
-              </button>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="p-4 bg-white rounded-lg">
-                <Truck className="w-6 h-6 text-primary-600 mx-auto mb-2" />
-                <p className="text-sm font-medium">Free Delivery</p>
-              </div>
-              <div className="p-4 bg-white rounded-lg">
-                <Shield className="w-6 h-6 text-primary-600 mx-auto mb-2" />
-                <p className="text-sm font-medium">Quality Assured</p>
-              </div>
-              <div className="p-4 bg-white rounded-lg">
-                <RotateCcw className="w-6 h-6 text-primary-600 mx-auto mb-2" />
-                <p className="text-sm font-medium">Easy Returns</p>
-              </div>
+          {/* Product Details Box */}
+          <div style={{ background: '#F8F8F6', borderRadius: 12, padding: 20, border: '0.5px solid #E8E6DF' }}>
+            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10, color: '#2C2C2A' }}>Product Details</div>
+            <p style={{ fontSize: 13, color: '#666', lineHeight: 1.6, marginBottom: 12 }}>
+              {product.description || 'High quality furniture with premium materials and craftsmanship.'}
+            </p>
+            <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 6, color: '#2C2C2A' }}>Dimensions</div>
+            <div style={{ fontSize: 13, color: '#666' }}>
+              {product.dimensions && typeof product.dimensions === 'object' 
+                ? `W ${product.dimensions.width || 210}cm · D ${product.dimensions.length || 85}cm · H ${product.dimensions.height || 85}cm`
+                : product.dimensions || 'W 210cm · D 85cm · H 85cm'
+              }
             </div>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="mt-12 bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="flex border-b border-secondary-200">
-            {['description', 'features', 'reviews'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-6 py-4 font-medium capitalize transition-colors ${
-                  activeTab === tab 
-                    ? 'text-primary-600 border-b-2 border-primary-600' 
-                    : 'text-secondary-600 hover:text-secondary-900'
-                }`}
-              >
-                {tab}
-              </button>
+        {/* Right - Info */}
+        <div>
+          {/* Category Tag */}
+          <div style={{ display: 'inline-block', padding: '6px 14px', background: '#E1F5EE', borderRadius: 4, fontSize: 12, fontWeight: 600, color: '#1D9E75', textTransform: 'uppercase', marginBottom: 12, letterSpacing: 0.5 }}>
+            {product.category}
+          </div>
+          
+          {/* Title */}
+          <h1 style={{ fontSize: 32, fontWeight: 600, fontFamily: "'Playfair Display', serif", marginBottom: 12, color: '#1A1A1A', lineHeight: 1.2 }}>
+            {product.name}
+          </h1>
+          
+          {/* Price */}
+          <div style={{ fontSize: 36, fontWeight: 700, color: '#085041', marginBottom: 4 }}>
+            ₹{monthlyPrice}<span style={{ fontSize: 16, color: '#888780', fontWeight: 400 }}> / month</span>
+          </div>
+          <div style={{ fontSize: 13, color: '#666', marginBottom: 12 }}>
+            ₹{monthlyPrice}/mo × {selectedMonths} {selectedMonths === 1 ? 'month' : 'months'} = <span style={{ fontWeight: 600, color: '#085041' }}>₹{totalPrice.toLocaleString('en-IN')} total</span>
+          </div>
+          
+          {/* Rating */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: '#666', marginBottom: 16 }}>
+            <span style={{ color: '#F59E0B', fontSize: 16 }}>★★★★★</span>
+            <span style={{ fontWeight: 500, color: '#2C2C2A' }}>4.5</span>
+            <span>(120 Reviews)</span>
+          </div>
+
+          {/* Short Description */}
+          <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, marginBottom: 20 }}>
+            {product.description || 'Compact bedside nightstand with drawer storage. Perfect companion for your bed.'}
+          </p>
+
+          {/* Duration Selector */}
+          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 10, color: '#2C2C2A' }}>Select Duration (1–24 months)</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 10 }}>
+            <button onClick={() => handleMonthChange(selectedMonths - 1)} disabled={selectedMonths <= 1}
+              style={{ width: 40, height: 40, border: '1.5px solid #E8E6DF', borderRadius: 8, background: '#fff', cursor: selectedMonths <= 1 ? 'not-allowed' : 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', color: selectedMonths <= 1 ? '#ccc' : '#2C2C2A', transition: 'all 0.15s' }}>−</button>
+            <select value={selectedMonths} onChange={(e) => handleMonthChange(Number(e.target.value))}
+              style={{ width: 120, textAlign: 'center', padding: '10px 12px', border: '1.5px solid #1D9E75', borderRadius: 8, fontSize: 15, fontWeight: 600, background: '#E1F5EE', color: '#085041', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", appearance: 'auto' }}>
+              {Array.from({ length: 24 }, (_, i) => i + 1).map(m => (
+                <option key={m} value={m}>{m} {m === 1 ? 'Month' : 'Months'}</option>
+              ))}
+            </select>
+            <button onClick={() => handleMonthChange(selectedMonths + 1)} disabled={selectedMonths >= 24}
+              style={{ width: 40, height: 40, border: '1.5px solid #E8E6DF', borderRadius: 8, background: '#fff', cursor: selectedMonths >= 24 ? 'not-allowed' : 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', color: selectedMonths >= 24 ? '#ccc' : '#2C2C2A', transition: 'all 0.15s' }}>+</button>
+            <div style={{ fontSize: 12, color: '#888780' }}>₹{monthlyPrice}/mo</div>
+          </div>
+
+          {/* Quick Pick Buttons */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+            {[1, 3, 6, 12, 24].map(m => (
+              <div key={m} onClick={() => handleMonthChange(m)}
+                style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s',
+                  border: `1.5px solid ${selectedMonths === m ? '#1D9E75' : '#E8E6DF'}`,
+                  background: selectedMonths === m ? '#E1F5EE' : '#fff',
+                  color: selectedMonths === m ? '#085041' : '#888780'
+                }}>{m} {m === 1 ? 'mo' : 'mo'}
+              </div>
             ))}
           </div>
 
-          <div className="p-6">
-            {activeTab === 'description' && (
-              <div className="prose max-w-none">
-                <p className="text-secondary-700 leading-relaxed">{product.description}</p>
-                {product.dimensions && (
-                  <div className="mt-6">
-                    <h4 className="font-semibold mb-2">Dimensions</h4>
-                    <p className="text-secondary-600">
-                      {product.dimensions.length} x {product.dimensions.width} x {product.dimensions.height} {product.dimensions.unit}
-                    </p>
-                  </div>
-                )}
-                {product.material && (
-                  <div className="mt-4">
-                    <h4 className="font-semibold mb-2">Material</h4>
-                    <p className="text-secondary-600">{product.material}</p>
-                  </div>
-                )}
-              </div>
-            )}
+          {/* Features */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#2C2C2A' }}>
+              <Check style={{ width: 16, height: 16, stroke: '#1D9E75' }} />Free Delivery & Installation
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#2C2C2A' }}>
+              <Check style={{ width: 16, height: 16, stroke: '#1D9E75' }} />Maintenance Included
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#2C2C2A' }}>
+              <Check style={{ width: 16, height: 16, stroke: '#1D9E75' }} />Easy Returns
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#2C2C2A' }}>
+              <Check style={{ width: 16, height: 16, stroke: '#1D9E75' }} />Damage Protection
+            </div>
+          </div>
 
-            {activeTab === 'features' && (
-              <ul className="space-y-2">
-                {product.features?.map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-500" />
-                    <span>{feature}</span>
-                  </li>
-                )) || <p className="text-secondary-500">No features listed</p>}
-              </ul>
-            )}
-
-            {activeTab === 'reviews' && (
-              <div>
-                {product.reviews?.length > 0 ? (
-                  <div className="space-y-6">
-                    {product.reviews.map(review => (
-                      <div key={review._id} className="border-b border-secondary-200 pb-6 last:border-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="flex">
-                            {[...Array(review.rating)].map((_, i) => (
-                              <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                            ))}
-                          </div>
-                          <span className="text-sm text-secondary-500">
-                            {new Date(review.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <p className="font-medium mb-1">{review.user?.name || 'Anonymous'}</p>
-                        <p className="text-secondary-700">{review.comment}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-secondary-500">No reviews yet</p>
-                )}
+          {/* Buttons: Add to Cart OR Quantity + Rent Now */}
+          {isInCart || showQuantity ? (
+            <div style={{ display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} 
+                  style={{ width: 44, height: 44, border: '1px solid #E8E6DF', borderRadius: 10, background: '#fff', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                <span style={{ minWidth: 30, textAlign: 'center', fontSize: 16, fontWeight: 600 }}>{quantity}</span>
+                <button onClick={() => setQuantity(quantity + 1)} 
+                  style={{ width: 44, height: 44, border: '1px solid #E8E6DF', borderRadius: 10, background: '#fff', cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
               </div>
-            )}
+              <button onClick={handleRentNow} 
+                style={{ flex: 1, padding: '14px 28px', borderRadius: 10, fontSize: 16, fontWeight: 600, background: '#063831', color: 'white', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.2s' }}>
+                Rent Now
+              </button>
+              <button onClick={toggleWishlist} title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'} 
+                style={{ width: 56, height: 56, borderRadius: 10, border: '1px solid ' + (isInWishlist ? '#C4575A' : '#E8E6DF'), background: isInWishlist ? '#FEE2E2' : 'transparent', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Heart style={{ width: 24, height: 24, stroke: isInWishlist ? '#C4575A' : '#888780', fill: isInWishlist ? '#C4575A' : 'none' }} />
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+              <button onClick={handleAddToCart} 
+                style={{ flex: 1, padding: '14px 28px', borderRadius: 10, fontSize: 16, fontWeight: 600, background: '#1D9E75', color: 'white', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.2s' }}>
+                Add to Cart
+              </button>
+              <button onClick={handleRentNow} 
+                style={{ flex: 1, padding: '14px 28px', borderRadius: 10, fontSize: 16, fontWeight: 600, background: '#063831', color: 'white', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", transition: 'all 0.2s' }}>
+                Rent Now
+              </button>
+              <button onClick={toggleWishlist} title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'} 
+                style={{ width: 56, height: 56, borderRadius: 10, border: '1px solid ' + (isInWishlist ? '#C4575A' : '#E8E6DF'), background: isInWishlist ? '#FEE2E2' : 'transparent', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Heart style={{ width: 24, height: 24, stroke: isInWishlist ? '#C4575A' : '#888780', fill: isInWishlist ? '#C4575A' : 'none' }} />
+              </button>
+            </div>
+          )}
+
+          {/* Seamless Delivery Guaranteed */}
+          <div style={{ background: '#fff', borderRadius: 12, padding: 20, border: '0.5px solid #E8E6DF', marginBottom: 24 }}>
+            <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: '#2C2C2A' }}>Seamless Delivery Guaranteed</div>
+            
+            <div style={{ display: 'flex', gap: 12 }}>
+              {/* Timeline Line */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ width: 8, height: 8, background: '#2C2C2A', borderRadius: '50%' }}></div>
+                <div style={{ width: 2, flex: 1, background: '#E8E6DF', margin: '4px 0' }}></div>
+                <div style={{ width: 8, height: 8, background: '#2C2C2A', borderRadius: '50%' }}></div>
+                <div style={{ width: 2, flex: 1, background: '#E8E6DF', margin: '4px 0' }}></div>
+                <div style={{ width: 8, height: 8, background: '#2C2C2A', borderRadius: '50%' }}></div>
+              </div>
+              
+              {/* Steps */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#2C2C2A', marginBottom: 4 }}>Step: 1</div>
+                  <div style={{ fontSize: 13, color: '#666', lineHeight: 1.5 }}>To ensure a seamless process, kindly complete your KYC verification after placing your order</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8, cursor: 'pointer' }}>
+                    <span style={{ fontSize: 12, fontWeight: 500, color: '#1D9E75' }}>Know More</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2">
+                      <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                  </div>
+                </div>
+                
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#2C2C2A', marginBottom: 4 }}>Step: 2</div>
+                  <div style={{ fontSize: 13, color: '#666', lineHeight: 1.5 }}>Select your delivery date as per your convenience</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8, cursor: 'pointer' }}>
+                    <span style={{ fontSize: 12, fontWeight: 500, color: '#1D9E75' }}>Know More</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2">
+                      <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                  </div>
+                </div>
+                
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#2C2C2A', marginBottom: 4 }}>Step: 3</div>
+                  <div style={{ fontSize: 13, color: '#666', lineHeight: 1.5 }}>Your furniture will be delivered and assembled all set to transform your space.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* You May Also Like */}
+          <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: '#2C2C2A', fontFamily: "'Playfair Display', serif" }}>You May Also Like</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            {[
+              { name: 'Accent Chair', price: 699, icon: '🪑' },
+              { name: 'Coffee Table', price: 499, icon: '☕' },
+            ].map((item, idx) => (
+              <Link to="/products" key={idx} style={{ textDecoration: 'none' }}>
+                <div style={{ background: '#F8F8F6', borderRadius: 12, padding: 12, cursor: 'pointer', border: '0.5px solid #E8E6DF', transition: 'all 0.15s' }}>
+                  <div style={{ height: 100, background: '#E8E6DF', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, marginBottom: 12 }}>{item.icon}</div>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: '#2C2C2A', marginBottom: 4 }}>{item.name}</div>
+                  <div style={{ fontSize: 13, color: '#1D9E75', fontWeight: 600 }}>₹{item.price}<span style={{ color: '#888780', fontWeight: 400 }}> / month</span></div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </div>

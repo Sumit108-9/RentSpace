@@ -1,369 +1,234 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  Users, 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2,
-  X
-} from 'lucide-react';
-import api from '../../utils/api';
+import { Plus, Pencil, Trash2, X } from 'lucide-react';
 import useStore from '../../store/useStore';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import toast from 'react-hot-toast';
+
+const CATEGORIES = ['sofa', 'bed', 'table', 'chair', 'wardrobe', 'decor', 'dining', 'storage'];
+
+const EMPTY_FORM = { name: '', description: '', category: 'sofa', monthlyRent: '', securityDeposit: '', countInStock: '10', images: '', isFeatured: false, isActive: true };
 
 const AdminProducts = () => {
-  const navigate = useNavigate();
-  const { user } = useStore();
   const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    category: 'sofa',
-    monthlyRent: '',
-    securityDeposit: '',
-    originalPrice: '',
-    countInStock: '',
-    images: [''],
-    features: [''],
-    isFeatured: false,
-    isActive: true
-  });
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [filterCat, setFilterCat] = useState('all');
 
-  useEffect(() => {
-    if (!user || user.role !== 'admin') {
-      navigate('/');
-      toast.error('Access denied');
-      return;
-    }
-    fetchProducts();
-  }, [user, navigate]);
+  const getToken = () => useStore.getState().token || localStorage.getItem('token');
 
   const fetchProducts = async () => {
+    setLoading(true);
     try {
-      const res = await api.get('/products?limit=100');
-      setProducts(res.data.products);
-    } catch (error) {
-      toast.error('Failed to load products');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const data = {
-        ...formData,
-        monthlyRent: Number(formData.monthlyRent),
-        securityDeposit: Number(formData.securityDeposit),
-        originalPrice: Number(formData.originalPrice),
-        countInStock: Number(formData.countInStock),
-        images: formData.images.filter(img => img.trim()),
-        features: formData.features.filter(f => f.trim())
-      };
-
-      if (editingProduct) {
-        await api.put(`/products/${editingProduct._id}`, data);
-        toast.success('Product updated');
+      const res = await fetch('/api/admin/products', { headers: { Authorization: `Bearer ${getToken()}` } });
+      const data = await res.json();
+      if (data.success) {
+        setProducts(data.data || []);
       } else {
-        await api.post('/products', data);
-        toast.success('Product created');
+        setProducts([]);
       }
-      
-      setShowModal(false);
-      setEditingProduct(null);
-      resetForm();
-      fetchProducts();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Operation failed');
+    } catch (e) {
+      setProducts([]);
     }
+    setLoading(false);
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
-    try {
-      await api.delete(`/products/${id}`);
-      toast.success('Product deleted');
-      fetchProducts();
-    } catch (error) {
-      toast.error('Failed to delete product');
-    }
-  };
+  useEffect(() => { fetchProducts(); }, []);
 
-  const handleEdit = (product) => {
-    setEditingProduct(product);
-    setFormData({
-      name: product.name,
-      description: product.description,
-      category: product.category,
-      monthlyRent: product.monthlyRent,
-      securityDeposit: product.securityDeposit || '',
-      originalPrice: product.originalPrice || '',
-      countInStock: product.countInStock,
-      images: product.images.length > 0 ? product.images : [''],
-      features: product.features?.length > 0 ? product.features : [''],
-      isFeatured: product.isFeatured,
-      isActive: product.isActive
+  const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setError(''); setShowModal(true); };
+
+  const openEdit = (p) => {
+    setEditingId(p._id);
+    setForm({
+      name: p.name || '',
+      description: p.description || '',
+      category: p.category || 'sofa',
+      monthlyRent: p.monthlyRent?.toString() || '',
+      securityDeposit: p.securityDeposit?.toString() || '0',
+      countInStock: p.countInStock?.toString() || '10',
+      images: (p.images || []).join(', '),
+      isFeatured: p.isFeatured || false,
+      isActive: p.isActive !== false
     });
+    setError('');
     setShowModal(true);
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      category: 'sofa',
-      monthlyRent: '',
-      securityDeposit: '',
-      originalPrice: '',
-      countInStock: '',
-      images: [''],
-      features: [''],
-      isFeatured: false,
-      isActive: true
-    });
+  const handleSave = async () => {
+    if (!form.name || !form.monthlyRent || !form.category) { setError('Name, rent, and category are required'); return; }
+    setSaving(true); setError('');
+    const body = {
+      name: form.name,
+      description: form.description || 'No description',
+      category: form.category,
+      monthlyRent: Number(form.monthlyRent),
+      securityDeposit: Number(form.securityDeposit) || 0,
+      countInStock: Number(form.countInStock) || 10,
+      images: form.images ? form.images.split(',').map(s => s.trim()).filter(Boolean) : [],
+      isFeatured: form.isFeatured,
+      isActive: form.isActive
+    };
+    try {
+      const url = editingId ? `/api/admin/products/${editingId}` : '/api/admin/products';
+      const method = editingId ? 'PUT' : 'POST';
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` }, body: JSON.stringify(body) });
+      const data = await res.json();
+      if (!data.success) { setError(data.message || 'Failed to save'); setSaving(false); return; }
+      setShowModal(false);
+      fetchProducts();
+    } catch (e) { setError('Network error'); }
+    setSaving(false);
   };
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this product?')) return;
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } });
+      const data = await res.json();
+      if (data.success) fetchProducts();
+    } catch (e) {}
+  };
 
-  if (isLoading) return <LoadingSpinner fullScreen />;
+  const filtered = products.filter(p => {
+    if (filterCat !== 'all' && p.category !== filterCat) return false;
+    if (search && !p.name?.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  const inputStyle = { width: '100%', padding: '12px 14px', border: '0.5px solid #e8e6df', borderRadius: 8, fontSize: 15, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' };
+  const labelStyle = { fontSize: 14, fontWeight: 500, color: '#888780', marginBottom: 6, display: 'block' };
 
   return (
-    <div className="min-h-screen bg-secondary-50 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-secondary-900 text-white flex-shrink-0 hidden lg:block">
-        <div className="p-6">
-          <Link to="/" className="text-2xl font-bold">RentSpace</Link>
-          <p className="text-secondary-400 text-sm">Admin Panel</p>
-        </div>
-        <nav className="px-4 pb-4">
-          <Link to="/admin" className="flex items-center gap-3 px-4 py-3 text-secondary-300 hover:bg-secondary-800 hover:text-white rounded-lg mb-1">
-            <LayoutDashboard className="w-5 h-5" /> Dashboard
-          </Link>
-          <Link to="/admin/products" className="flex items-center gap-3 px-4 py-3 bg-primary-600 text-white rounded-lg mb-1">
-            <Package className="w-5 h-5" /> Products
-          </Link>
-          <Link to="/admin/orders" className="flex items-center gap-3 px-4 py-3 text-secondary-300 hover:bg-secondary-800 hover:text-white rounded-lg mb-1">
-            <ShoppingCart className="w-5 h-5" /> Orders
-          </Link>
-          <Link to="/admin/users" className="flex items-center gap-3 px-4 py-3 text-secondary-300 hover:bg-secondary-800 hover:text-white rounded-lg mb-1">
-            <Users className="w-5 h-5" /> Users
-          </Link>
-        </nav>
-      </aside>
+    <div>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div style={{ fontSize: 30, fontWeight: 700, color: '#2C2C2A', fontFamily: "'Playfair Display', serif" }}>Products</div>
+        <button onClick={openAdd} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 8, fontSize: 15, fontWeight: 500, background: '#1D9E75', color: '#fff', border: 'none', cursor: 'pointer' }}>
+          <Plus style={{ width: 18, height: 18 }} /> Add Product
+        </button>
+      </div>
 
-      {/* Main Content */}
-      <main className="flex-1 p-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Products</h1>
-          <button 
-            onClick={() => { resetForm(); setEditingProduct(null); setShowModal(true); }}
-            className="btn-primary"
-          >
-            <Plus className="w-5 h-5 mr-2" /> Add Product
-          </button>
-        </div>
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+        <input placeholder="Search products..." value={search} onChange={e => setSearch(e.target.value)} style={{ ...inputStyle, maxWidth: 300 }} />
+        <select value={filterCat} onChange={e => setFilterCat(e.target.value)} style={{ ...inputStyle, maxWidth: 180 }}>
+          <option value="all">All Categories</option>
+          {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+        </select>
+      </div>
 
-        <div className="bg-white rounded-xl shadow-sm">
-          <div className="p-6 border-b border-secondary-100">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full max-w-md pl-10 pr-4 py-2 border border-secondary-200 rounded-lg"
-              />
+      {/* Product count */}
+      <div style={{ fontSize: 14, color: '#888780', marginBottom: 16 }}>{filtered.length} product{filtered.length !== 1 ? 's' : ''} found</div>
+
+      {/* Product Grid - 4 columns */}
+      {loading ? (
+        <div style={{ padding: 40, textAlign: 'center', color: '#888780', fontSize: 15 }}>Loading products...</div>
+      ) : filtered.length === 0 ? (
+        <div style={{ padding: 40, textAlign: 'center', color: '#888780', fontSize: 15 }}>No products found</div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+          {filtered.map(p => (
+            <div key={p._id} style={{ background: '#fff', border: '0.5px solid #E8E6DF', borderRadius: 12, overflow: 'hidden' }}>
+              {/* Image */}
+              <div style={{ height: 160, background: '#F5F4F0', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {p.images?.[0] ? <img src={p.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: 32 }}>🪑</span>}
+              </div>
+              {/* Content */}
+              <div style={{ padding: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#2C2C2A', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                <div style={{ fontSize: 12, color: '#888780', marginBottom: 8, textTransform: 'capitalize' }}>{p.category}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: '#1D9E75' }}>₹{(p.monthlyRent || 0).toLocaleString('en-IN')}/mo</span>
+                  <span style={{ fontSize: 12, color: p.countInStock > 0 ? '#2C2C2A' : '#B91C1C' }}>{p.countInStock ?? 0} in stock</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, fontWeight: 500, background: p.isActive ? '#DCFCE7' : '#FEE2E2', color: p.isActive ? '#166534' : '#B91C1C' }}>
+                    {p.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => openEdit(p)} title="Edit" style={{ padding: 6, borderRadius: 6, background: '#F5F4F0', border: 'none', cursor: 'pointer' }}>
+                      <Pencil style={{ width: 14, height: 14, stroke: '#1D9E75' }} />
+                    </button>
+                    <button onClick={() => handleDelete(p._id)} title="Delete" style={{ padding: 6, borderRadius: 6, background: '#FEE2E2', border: 'none', cursor: 'pointer' }}>
+                      <Trash2 style={{ width: 14, height: 14, stroke: '#B91C1C' }} />
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-secondary-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-secondary-500">Product</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-secondary-500">Category</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-secondary-500">Monthly Rent</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-secondary-500">Stock</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-secondary-500">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-secondary-500">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-secondary-100">
-                {filteredProducts.map(product => (
-                  <tr key={product._id} className="hover:bg-secondary-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <img src={product.images[0]} alt="" className="w-12 h-12 object-cover rounded-lg" />
-                        <span className="font-medium">{product.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 capitalize">{product.category}</td>
-                    <td className="px-6 py-4">₹{product.monthlyRent}</td>
-                    <td className="px-6 py-4">{product.countInStock}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                        product.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {product.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button 
-                          onClick={() => handleEdit(product)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(product._id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          ))}
         </div>
-      </main>
+      )}
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-secondary-100 flex items-center justify-between">
-              <h2 className="text-xl font-bold">{editingProduct ? 'Edit Product' : 'Add Product'}</h2>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-secondary-100 rounded-lg">
-                <X className="w-5 h-5" />
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', borderRadius: 14, padding: 32, width: '100%', maxWidth: 540, maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+            <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer' }}>
+              <X style={{ width: 20, height: 20, stroke: '#888780' }} />
+            </button>
+            <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 24, color: '#2C2C2A', fontFamily: "'Playfair Display', serif" }}>
+              {editingId ? 'Edit Product' : 'Add New Product'}
+            </div>
+
+            {error && <div style={{ background: '#FEE2E2', color: '#B91C1C', padding: '10px 14px', borderRadius: 8, fontSize: 14, marginBottom: 16 }}>{error}</div>}
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>Product Name *</label>
+              <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputStyle} placeholder="e.g. 3 Seater Sofa" />
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>Description</label>
+              <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} style={{ ...inputStyle, resize: 'vertical' }} placeholder="Product description..." />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <div>
+                <label style={labelStyle}>Category *</label>
+                <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={inputStyle}>
+                  {CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Monthly Rent (₹) *</label>
+                <input type="number" value={form.monthlyRent} onChange={e => setForm({ ...form, monthlyRent: e.target.value })} style={inputStyle} placeholder="1299" />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <div>
+                <label style={labelStyle}>Security Deposit (₹)</label>
+                <input type="number" value={form.securityDeposit} onChange={e => setForm({ ...form, securityDeposit: e.target.value })} style={inputStyle} placeholder="0" />
+              </div>
+              <div>
+                <label style={labelStyle}>Stock Count</label>
+                <input type="number" value={form.countInStock} onChange={e => setForm({ ...form, countInStock: e.target.value })} style={inputStyle} placeholder="10" />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>Image URLs (comma-separated)</label>
+              <input value={form.images} onChange={e => setForm({ ...form, images: e.target.value })} style={inputStyle} placeholder="https://example.com/img1.jpg, https://..." />
+            </div>
+
+            <div style={{ display: 'flex', gap: 20, marginBottom: 24 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#2C2C2A', cursor: 'pointer' }}>
+                <input type="checkbox" checked={form.isFeatured} onChange={e => setForm({ ...form, isFeatured: e.target.checked })} /> Featured
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: '#2C2C2A', cursor: 'pointer' }}>
+                <input type="checkbox" checked={form.isActive} onChange={e => setForm({ ...form, isActive: e.target.checked })} /> Active
+              </label>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowModal(false)} style={{ padding: '12px 24px', borderRadius: 8, fontSize: 15, fontWeight: 500, background: '#F5F4F0', color: '#2C2C2A', border: 'none', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={handleSave} disabled={saving} style={{ padding: '12px 28px', borderRadius: 8, fontSize: 15, fontWeight: 500, background: '#1D9E75', color: '#fff', border: 'none', cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>
+                {saving ? 'Saving...' : editingId ? 'Update Product' : 'Create Product'}
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-2">Name</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="input"
-                    required
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-2">Description</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    className="input"
-                    rows={3}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Category</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
-                    className="input"
-                  >
-                    {['sofa', 'bed', 'table', 'chair', 'wardrobe', 'decor', 'dining', 'storage'].map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Monthly Rent (₹)</label>
-                  <input
-                    type="number"
-                    value={formData.monthlyRent}
-                    onChange={(e) => setFormData({...formData, monthlyRent: e.target.value})}
-                    className="input"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Security Deposit (₹)</label>
-                  <input
-                    type="number"
-                    value={formData.securityDeposit}
-                    onChange={(e) => setFormData({...formData, securityDeposit: e.target.value})}
-                    className="input"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Original Price (₹)</label>
-                  <input
-                    type="number"
-                    value={formData.originalPrice}
-                    onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
-                    className="input"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Stock Count</label>
-                  <input
-                    type="number"
-                    value={formData.countInStock}
-                    onChange={(e) => setFormData({...formData, countInStock: e.target.value})}
-                    className="input"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Image URL</label>
-                  <input
-                    type="text"
-                    value={formData.images[0]}
-                    onChange={(e) => setFormData({...formData, images: [e.target.value]})}
-                    className="input"
-                    placeholder="https://..."
-                  />
-                </div>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.isFeatured}
-                      onChange={(e) => setFormData({...formData, isFeatured: e.target.checked})}
-                    />
-                    Featured
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-                    />
-                    Active
-                  </label>
-                </div>
-              </div>
-              <div className="flex justify-end gap-4 pt-4">
-                <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">
-                  Cancel
-                </button>
-                <button type="submit" className="btn-primary">
-                  {editingProduct ? 'Update' : 'Create'}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

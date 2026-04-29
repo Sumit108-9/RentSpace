@@ -32,6 +32,11 @@ const orderItemSchema = new mongoose.Schema({
 });
 
 const orderSchema = new mongoose.Schema({
+  orderNumber: {
+    type: String,
+    unique: true,
+    index: true
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -55,16 +60,57 @@ const orderSchema = new mongoose.Schema({
     status: String,
     method: {
       type: String,
-      enum: ['card', 'upi', 'netbanking', 'cod'],
+      enum: ['card', 'upi', 'netbanking', 'cod', 'razorpay'],
       required: true
     }
   },
-  itemsTotal: {
-    type: Number,
-    required: true,
-    default: 0
+  // Razorpay specific fields
+  razorpayOrderId: {
+    type: String,
+    index: true
   },
-  securityDeposit: {
+  razorpayPaymentId: {
+    type: String,
+    index: true
+  },
+  isPaid: {
+    type: Boolean,
+    default: false
+  },
+  paidAt: {
+    type: Date
+  },
+  paymentDetails: {
+    // Stores detailed payment info from Razorpay
+    method: String,
+    amount: Number,
+    currency: String,
+    status: String,
+    captured: Boolean,
+    card: {
+      network: String,
+      last4: String,
+      type: String
+    },
+    upi: {
+      vpa: String,
+      flow: String
+    },
+    bank: String,
+    wallet: String,
+    fee: Number,
+    tax: Number,
+    error: String,
+    created_at: Number
+  },
+  refundDetails: {
+    refundId: String,
+    amount: Number,
+    status: String,
+    reason: String,
+    createdAt: Date
+  },
+  itemsTotal: {
     type: Number,
     required: true,
     default: 0
@@ -87,7 +133,7 @@ const orderSchema = new mongoose.Schema({
   },
   orderStatus: {
     type: String,
-    enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned'],
+    enum: ['pending', 'pending_payment', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned', 'payment_failed'],
     default: 'pending'
   },
   paymentStatus: {
@@ -112,6 +158,16 @@ const orderSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+// Performance indexes for high-traffic queries
+orderSchema.index({ user: 1 });
+orderSchema.index({ orderStatus: 1 });
+orderSchema.index({ paymentStatus: 1 });
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ orderStatus: 1, createdAt: -1 });
+orderSchema.index({ isPaid: 1 });
+orderSchema.index({ 'orderItems.product': 1 });
 
 const Order = mongoose.model('Order', orderSchema);
 export default Order;

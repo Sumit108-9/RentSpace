@@ -15,7 +15,18 @@ export const protect = async (req, res, next) => {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Check if this is an admin token (has role but no id)
+      if (decoded.role === 'admin' && !decoded.id) {
+        req.user = { role: 'admin', email: decoded.email };
+        return next();
+      }
+      
+      // Regular user token - fetch from database
       req.user = await User.findById(decoded.id).select('-password');
+      if (!req.user) {
+        return res.status(401).json({ success: false, message: 'User not found' });
+      }
       next();
     } catch (error) {
       return res.status(401).json({ success: false, message: 'Not authorized, token failed' });
@@ -32,3 +43,6 @@ export const adminOnly = (req, res, next) => {
     res.status(403).json({ success: false, message: 'Not authorized as admin' });
   }
 };
+
+// Alias export for compatibility
+export const admin = adminOnly;

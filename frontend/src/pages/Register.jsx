@@ -1,227 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowRight, Loader2 } from 'lucide-react';
-import api from '../utils/api';
 import useStore from '../store/useStore';
-import toast from 'react-hot-toast';
+import { ToastContext } from '../App';
+import OTPVerification from '../components/OTPVerification';
 
 const Register = () => {
   const navigate = useNavigate();
-  const { setAuth } = useStore();
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: ''
-  });
-  const [errors, setErrors] = useState({});
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' });
-    }
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
-    }
-    if (!formData.phone) newErrors.phone = 'Phone is required';
-    else if (!/^[0-9]{10}$/.test(formData.phone)) {
-      newErrors.phone = 'Please enter a valid 10-digit phone number';
-    }
-    if (!formData.password) newErrors.password = 'Password is required';
-    else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-    if (!agreedToTerms) {
-      newErrors.terms = 'You must agree to the terms';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const setAuth = useStore((s) => s.setAuth);
+  const toast = useContext(ToastContext);
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', phone: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
-
-    setIsLoading(true);
+    setError('');
+    setLoading(true);
     try {
-      const { confirmPassword, ...registerData } = formData;
-      const res = await api.post('/auth/register', registerData);
-      const { token, user } = res.data;
-      
-      setAuth(user, token);
-      toast.success('Account created successfully!');
-      navigate('/');
-    } catch (error) {
-      const message = error.response?.data?.message || 'Registration failed';
-      toast.error(message);
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (data.success) {
+        // Show OTP verification modal
+        setRegisteredEmail(formData.email);
+        setShowOTP(true);
+      } else {
+        setError(data.message || (data.errors?.[0]?.msg) || 'Registration failed');
+      }
+    } catch (err) {
+      setError('Unable to reach server. Please try again.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
-      >
-        <div className="rounded-2xl shadow-lg p-8" style={{ backgroundColor: 'var(--surface)' }}>
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Create Account</h1>
-            <p style={{ color: 'var(--text-secondary)' }}>Join RentSpace and start renting today</p>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, background: '#FAFAF8' }}>
+      <div style={{ background: '#fff', border: '1px solid #E8E6DF', borderRadius: 12, padding: 48, width: '100%', maxWidth: 520 }}>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fontWeight: 600, marginBottom: 12, textAlign: 'center', color: '#2C2C2A' }}>Create Account</h2>
+        <p style={{ fontSize: 16, color: '#888780', marginBottom: 32, textAlign: 'center', fontFamily: "'DM Sans', sans-serif" }}>Join RentSpace today</p>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 14, fontWeight: 500, color: '#888780', marginBottom: 8, display: 'block', fontFamily: "'DM Sans', sans-serif" }}>Full Name</label>
+            <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required style={{ width: '100%', height: 48, padding: '0 14px', border: '1px solid #E8E6DF', borderRadius: 8, fontSize: 16, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }} />
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>Full Name</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter your full name"
-                  className={`input pl-11 ${errors.name ? 'input-error' : ''}`}
-                />
-              </div>
-              {errors.name && <p className="text-sm mt-1" style={{ color: 'var(--error)' }}>{errors.name}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  className={`input pl-11 ${errors.email ? 'input-error' : ''}`}
-                />
-              </div>
-              {errors.email && <p className="text-sm mt-1" style={{ color: 'var(--error)' }}>{errors.email}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>Phone Number</label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="Enter 10-digit phone number"
-                  className={`input pl-11 ${errors.phone ? 'input-error' : ''}`}
-                />
-              </div>
-              {errors.phone && <p className="text-sm mt-1" style={{ color: 'var(--error)' }}>{errors.phone}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Create a password (min 6 chars)"
-                  className={`input pl-11 pr-11 ${errors.password ? 'input-error' : ''}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-              {errors.password && <p className="text-sm mt-1" style={{ color: 'var(--error)' }}>{errors.password}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>Confirm Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirm your password"
-                  className={`input pl-11 ${errors.confirmPassword ? 'input-error' : ''}`}
-                />
-              </div>
-              {errors.confirmPassword && <p className="text-sm mt-1" style={{ color: 'var(--error)' }}>{errors.confirmPassword}</p>}
-            </div>
-
-            <div>
-              <label className="flex items-start gap-2 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="w-4 h-4 rounded mt-0.5" 
-                  style={{ accentColor: 'var(--accent)' }}
-                />
-                <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                  I agree to the{' '}
-                  <Link to="/terms" className="hover:opacity-80 transition-opacity" style={{ color: 'var(--accent)' }}>Terms of Service</Link>
-                  {' '}and{' '}
-                  <Link to="/privacy" className="hover:opacity-80 transition-opacity" style={{ color: 'var(--accent)' }}>Privacy Policy</Link>
-                </span>
-              </label>
-              {errors.terms && <p className="text-sm mt-1" style={{ color: 'var(--error)' }}>{errors.terms}</p>}
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full btn-primary py-4"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  Create Account
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p style={{ color: 'var(--text-secondary)' }}>
-              Already have an account?{' '}
-              <Link to="/login" className="font-medium hover:opacity-80 transition-opacity" style={{ color: 'var(--accent)' }}>
-                Sign in
-              </Link>
-            </p>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 14, fontWeight: 500, color: '#888780', marginBottom: 8, display: 'block', fontFamily: "'DM Sans', sans-serif" }}>Email</label>
+            <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required style={{ width: '100%', height: 48, padding: '0 14px', border: '1px solid #E8E6DF', borderRadius: 8, fontSize: 16, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }} />
           </div>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 14, fontWeight: 500, color: '#888780', marginBottom: 8, display: 'block', fontFamily: "'DM Sans', sans-serif" }}>Phone</label>
+            <input type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} style={{ width: '100%', height: 48, padding: '0 14px', border: '1px solid #E8E6DF', borderRadius: 8, fontSize: 16, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ fontSize: 14, fontWeight: 500, color: '#888780', marginBottom: 8, display: 'block', fontFamily: "'DM Sans', sans-serif" }}>Password</label>
+            <input type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} required style={{ width: '100%', height: 48, padding: '0 14px', border: '1px solid #E8E6DF', borderRadius: 8, fontSize: 16, fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+          {error && <div style={{ background: '#FEE2E2', color: '#B91C1C', padding: '12px 16px', borderRadius: 8, fontSize: 14, marginBottom: 24, textAlign: 'center', fontFamily: "'DM Sans', sans-serif" }}>{error}</div>}
+          <button type="submit" disabled={loading} style={{ width: '100%', height: 52, borderRadius: 8, fontSize: 16, fontWeight: 600, background: loading ? '#9bc9b9' : '#1D9E75', color: 'white', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: "'DM Sans', sans-serif", marginBottom: 24 }}>{loading ? 'Creating...' : 'Create Account'}</button>
+        </form>
+        <div style={{ textAlign: 'center', fontSize: 14, color: '#888780', fontFamily: "'DM Sans', sans-serif" }}>
+          Already have an account? <Link to="/login" style={{ color: '#1D9E75', textDecoration: 'none', fontWeight: 500 }}>Sign in</Link>
         </div>
-      </motion.div>
+      </div>
+
+      {showOTP && (
+        <OTPVerification
+          email={registeredEmail}
+          onSuccess={() => {
+            toast?.success('Email verified! Please sign in.');
+            navigate('/login');
+          }}
+          onClose={() => {
+            setShowOTP(false);
+            toast?.success('Account created! Please verify your email and sign in.');
+            navigate('/login');
+          }}
+        />
+      )}
     </div>
   );
 };
