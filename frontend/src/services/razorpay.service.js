@@ -1,7 +1,8 @@
 import api from '../utils/api';
 
 // Razorpay key (use .env in production)
-const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_SeqjX7UcUPZRwI';
+const RAZORPAY_KEY_ID =
+  import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_SeqjX7UcUPZRwI';
 
 /**
  * Load Razorpay script dynamically
@@ -10,8 +11,10 @@ export const loadRazorpayScript = () => {
   return new Promise((resolve) => {
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+
     script.onload = () => resolve(true);
     script.onerror = () => resolve(false);
+
     document.body.appendChild(script);
   });
 };
@@ -32,6 +35,7 @@ export const createRazorpayOrder = async (
       receipt,
       notes,
     });
+
     return response.data;
   } catch (error) {
     console.error('Error creating Razorpay order:', error);
@@ -53,6 +57,7 @@ export const verifyPayment = async (
       razorpay_payment_id,
       razorpay_signature,
     });
+
     return response.data;
   } catch (error) {
     console.error('Error verifying payment:', error);
@@ -74,9 +79,11 @@ export const openRazorpayCheckout = async (options) => {
     const razorpay = new window.Razorpay({
       key: RAZORPAY_KEY_ID,
       ...options,
+
       handler: function (response) {
         resolve(response);
       },
+
       modal: {
         ondismiss: function () {
           reject(new Error('Payment cancelled by user'));
@@ -99,14 +106,21 @@ export const processPayment = async (
 ) => {
   try {
     // Step 1: Create order
-    const orderResponse = await createRazorpayOrder(amount, 'INR', orderId, {
-      customer_name: customerDetails.name,
-      customer_email: customerDetails.email,
-      customer_phone: customerDetails.phone,
-    });
+    const orderResponse = await createRazorpayOrder(
+      amount,
+      'INR',
+      orderId,
+      {
+        customer_name: customerDetails.name,
+        customer_email: customerDetails.email,
+        customer_phone: customerDetails.phone,
+      }
+    );
 
     if (!orderResponse.success) {
-      throw new Error(orderResponse.message || 'Failed to create payment order');
+      throw new Error(
+        orderResponse.message || 'Failed to create payment order'
+      );
     }
 
     const { order } = orderResponse;
@@ -118,14 +132,17 @@ export const processPayment = async (
       name: 'RentSpace',
       description,
       order_id: order.id,
+
       prefill: {
         name: customerDetails.name,
         email: customerDetails.email,
         contact: customerDetails.phone,
       },
+
       theme: {
         color: '#ff6b35',
       },
+
       notes: order.notes,
     });
 
@@ -143,9 +160,9 @@ export const processPayment = async (
         order_id: paymentResponse.razorpay_order_id,
         signature: paymentResponse.razorpay_signature,
       };
-    } else {
-      throw new Error('Payment verification failed');
     }
+
+    throw new Error('Payment verification failed');
   } catch (error) {
     console.error('Payment processing error:', error);
     throw error;
