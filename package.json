@@ -13,6 +13,7 @@
   "dependencies": {
     "compression": "^1.8.1",
     "dotenv": "^17.4.2",
+    "firebase": "^12.12.1",
     "google-auth-library": "^10.6.2",
     "helmet": "^8.1.0",
     "ioredis": "^5.10.1",
