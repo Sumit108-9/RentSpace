@@ -1,7 +1,7 @@
 import api from '../utils/api';
 
-// Razorpay key ID (should be in environment variables in production)
-const RAZORPAY_KEY_ID = 'rzp_test_SeqjX7UcUPZRwI';
+// Razorpay key (use .env in production)
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_SeqjX7UcUPZRwI';
 
 /**
  * Load Razorpay script dynamically
@@ -10,24 +10,21 @@ export const loadRazorpayScript = () => {
   return new Promise((resolve) => {
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => {
-      resolve(true);
-    };
-    script.onerror = () => {
-      resolve(false);
-    };
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
     document.body.appendChild(script);
   });
 };
 
 /**
  * Create Razorpay order
- * @param {number} amount - Amount in INR
- * @param {string} currency - Currency code (default: INR)
- * @param {string} receipt - Receipt ID
- * @param {object} notes - Additional notes
  */
-export const createRazorpayOrder = async (amount, currency = 'INR', receipt, notes = {}) => {
+export const createRazorpayOrder = async (
+  amount,
+  currency = 'INR',
+  receipt,
+  notes = {}
+) => {
   try {
     const response = await api.post('/payment/create-order', {
       amount,
@@ -44,11 +41,12 @@ export const createRazorpayOrder = async (amount, currency = 'INR', receipt, not
 
 /**
  * Verify payment signature
- * @param {string} razorpay_order_id - Razorpay order ID
- * @param {string} razorpay_payment_id - Razorpay payment ID
- * @param {string} razorpay_signature - Razorpay signature
  */
-export const verifyPayment = async (razorpay_order_id, razorpay_payment_id, razorpay_signature) => {
+export const verifyPayment = async (
+  razorpay_order_id,
+  razorpay_payment_id,
+  razorpay_signature
+) => {
   try {
     const response = await api.post('/payment/verify', {
       razorpay_order_id,
@@ -63,12 +61,11 @@ export const verifyPayment = async (razorpay_order_id, razorpay_payment_id, razo
 };
 
 /**
- * Initialize Razorpay checkout
- * @param {object} options - Razorpay checkout options
+ * Open Razorpay checkout
  */
 export const openRazorpayCheckout = async (options) => {
   const scriptLoaded = await loadRazorpayScript();
-  
+
   if (!scriptLoaded) {
     throw new Error('Failed to load Razorpay script');
   }
@@ -78,12 +75,10 @@ export const openRazorpayCheckout = async (options) => {
       key: RAZORPAY_KEY_ID,
       ...options,
       handler: function (response) {
-        // Payment successful
         resolve(response);
       },
       modal: {
         ondismiss: function () {
-          // Modal closed without payment
           reject(new Error('Payment cancelled by user'));
         },
       },
@@ -94,15 +89,16 @@ export const openRazorpayCheckout = async (options) => {
 };
 
 /**
- * Process payment with Razorpay
- * @param {number} amount - Amount in INR
- * @param {string} orderId - Order ID
- * @param {object} customerDetails - Customer details (name, email, phone)
- * @param {string} description - Payment description
+ * Full payment process
  */
-export const processPayment = async (amount, orderId, customerDetails, description = 'Furniture Rental Payment') => {
+export const processPayment = async (
+  amount,
+  orderId,
+  customerDetails,
+  description = 'Furniture Rental Payment'
+) => {
   try {
-    // Step 1: Create Razorpay order
+    // Step 1: Create order
     const orderResponse = await createRazorpayOrder(amount, 'INR', orderId, {
       customer_name: customerDetails.name,
       customer_email: customerDetails.email,
@@ -115,7 +111,7 @@ export const processPayment = async (amount, orderId, customerDetails, descripti
 
     const { order } = orderResponse;
 
-    // Step 2: Open Razorpay checkout
+    // Step 2: Open checkout
     const paymentResponse = await openRazorpayCheckout({
       amount: order.amount,
       currency: order.currency,
@@ -133,7 +129,7 @@ export const processPayment = async (amount, orderId, customerDetails, descripti
       notes: order.notes,
     });
 
-    // Step 3: Verify payment signature
+    // Step 3: Verify payment
     const verificationResponse = await verifyPayment(
       paymentResponse.razorpay_order_id,
       paymentResponse.razorpay_payment_id,
@@ -154,12 +150,4 @@ export const processPayment = async (amount, orderId, customerDetails, descripti
     console.error('Payment processing error:', error);
     throw error;
   }
-};
-
-export default {
-  createRazorpayOrder,
-  verifyPayment,
-  openRazorpayCheckout,
-  loadRazorpayScript,
-  processPayment,
 };
