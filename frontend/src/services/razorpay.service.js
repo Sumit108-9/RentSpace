@@ -6,7 +6,7 @@ const RAZORPAY_KEY_ID = 'rzp_test_SeqjX7UcUPZRwI';
 /**
  * Load Razorpay script dynamically
  */
-const loadRazorpayScript = () => {
+export const loadRazorpayScript = () => {
   return new Promise((resolve) => {
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -154,14 +154,6 @@ export const processPayment = async (amount, orderId, customerDetails, descripti
     console.error('Payment processing error:', error);
     throw error;
   }
-};
-
-export {
-  createRazorpayOrder,
-  verifyPayment,
-  openRazorpayCheckout,
-  loadRazorpayScript,
-  processPayment,
 };
 
 export default {
