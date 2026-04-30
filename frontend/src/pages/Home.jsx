@@ -11,11 +11,11 @@ const Home = () => {
       try {
         const response = await api.get('/products?limit=4');
         const data = response.data;
-          if (data.success && data.products?.length > 0) {
-            setFeaturedProducts(data.products.slice(0, 4));
-            return;
-          }
-        } catch (err) {
+        if (data.success && data.products?.length > 0) {
+          setFeaturedProducts(data.products.slice(0, 4));
+          return;
+        }
+      } catch (err) {
         // Silently fail, will show empty state
       }
     };

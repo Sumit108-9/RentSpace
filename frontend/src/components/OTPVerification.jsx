@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mail, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
+import api from '../utils/api';
 
 const OTPVerification = ({ email, onSuccess, onClose }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -63,13 +64,8 @@ const OTPVerification = ({ email, onSuccess, onClose }) => {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/verify-email-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp: otpToVerify })
-      });
-
-      const data = await response.json();
+      const response = await api.post('/auth/verify-email-otp', { email, otp: otpToVerify });
+      const data = response.data;
 
       if (data.success) {
         setSuccess(true);
@@ -91,13 +87,8 @@ const OTPVerification = ({ email, onSuccess, onClose }) => {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/send-email-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-
-      const data = await response.json();
+      const response = await api.post('/auth/send-email-otp', { email });
+      const data = response.data;
 
       if (data.success) {
         setTimeLeft(300); // Reset timer
