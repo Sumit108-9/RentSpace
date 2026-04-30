@@ -89,21 +89,14 @@ const ProductDetails = () => {
     
     // Sync to backend
     try {
-      const token = localStorage.getItem('token');
-      await fetch('/api/cart/add', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          productId: product._id || product.id,
-          quantity: quantity,
-          duration: selectedMonths,
-          rentalDuration: selectedMonths
-        })
+      await api.post('/cart/add', {
+        productId: product._id || product.id,
+        quantity: quantity,
+        duration: selectedMonths,
+        rentalDuration: selectedMonths
       });
     } catch (err) {
+      console.error('Failed to sync cart:', err);
       // Silent fail - local cart still works
     }
     
@@ -124,21 +117,14 @@ const ProductDetails = () => {
     
     // Sync to backend
     try {
-      const token = localStorage.getItem('token');
-      await fetch('/api/cart/add', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          productId: product._id || product.id,
-          quantity: quantity,
-          duration: selectedMonths,
-          rentalDuration: selectedMonths
-        })
+      await api.post('/cart/add', {
+        productId: product._id || product.id,
+        quantity: quantity,
+        duration: selectedMonths,
+        rentalDuration: selectedMonths
       });
     } catch (err) {
+      console.error('Failed to sync cart:', err);
       // Silent fail - local cart still works
     }
     

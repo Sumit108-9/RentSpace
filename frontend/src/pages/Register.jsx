@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import { ToastContext } from '../App';
 import OTPVerification from '../components/OTPVerification';
+import api from '../utils/api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -19,12 +20,8 @@ const Register = () => {
     setError('');
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      const data = await response.json();
+      const response = await api.post('/auth/register', formData);
+      const data = response.data;
       if (data.success) {
         // Show OTP verification modal
         setRegisteredEmail(formData.email);

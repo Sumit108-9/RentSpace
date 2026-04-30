@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import { ToastContext } from '../App';
+import api from '../utils/api';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,12 +17,8 @@ const Login = () => {
     setError('');
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      const data = await response.json();
+      const response = await api.post('/auth/login', formData);
+      const data = response.data;
       if (data.success) {
         setAuth(data.user, data.token);
         localStorage.setItem('token', data.token);
