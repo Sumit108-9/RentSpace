@@ -1,28 +1,14 @@
 import axios from 'axios';
 
-// 🔥 Safe baseURL (handles missing env properly)
-const BASE_URL =
-  import.meta.env.VITE_API_URL?.trim() ||
-  (import.meta.env.DEV ? 'http://localhost:5000' : '');
-
-if (!BASE_URL) {
-  console.error('❌ VITE_API_URL is not set!');
-}
-
-// ✅ Axios instance
-import axios from 'axios';
-
 const api = axios.create({
-  baseURL: "https://rentspace-backend-ch9s.onrender.com", // 🔥 hardcoded TEMP fix
+  baseURL: 'https://rentspace-backend-ch9s.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true,
 });
 
-export default api;
-
-// ✅ Attach token to every request
+// Attach token to every request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -34,20 +20,20 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Handle response errors
+// Handle response errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // 🔐 Auto logout on unauthorized
+    // Auto logout on unauthorized
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
 
-    // 🌐 Better network error handling
+    // Better network error handling
     if (!error.response) {
-      console.error('🌐 Network error - backend unreachable');
+      console.error('Network error - backend unreachable');
     }
 
     return Promise.reject(error);
