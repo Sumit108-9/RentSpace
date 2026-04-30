@@ -10,13 +10,17 @@ if (!BASE_URL) {
 }
 
 // ✅ Axios instance
+import axios from 'axios';
+
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: "https://rentspace-backend-ch9s.onrender.com", // 🔥 hardcoded TEMP fix
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true,
 });
+
+export default api;
 
 // ✅ Attach token to every request
 api.interceptors.request.use(
