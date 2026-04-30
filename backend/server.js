@@ -6,7 +6,6 @@ import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 
-import { verifyEmailConnection } from './config/email.js';
 import connectDB from './config/db.js';
 import { createLogger } from './config/logger.js';
 
@@ -26,7 +25,7 @@ const app = express();
 const logger = createLogger();
 
 
-// 🔐 SECURITY (Helmet)
+// 🔐 SECURITY
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
@@ -37,16 +36,26 @@ app.use(compression());
 
 
 // 🚫 RATE LIMITING
-const generalLimiter = rateLimit({
+app.use(rateLimit({
   windowMs: 60 * 1000,
   max: 100,
-});
-app.use(generalLimiter);
+}));
 
 
-// 🔥 ✅ FIXED CORS (IMPORTANT)
+// 🔥 ✅ PROPER CORS (LOCAL + PRODUCTION)
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://rent-space-pi.vercel.app"
+];
+
 app.use(cors({
-  origin: "https://rent-space-pi.vercel.app", // your frontend URL
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS not allowed"));
+    }
+  },
   credentials: true,
 }));
 
@@ -116,9 +125,8 @@ const startServer = async () => {
   try {
     await connectDB();
 
-    app.listen(PORT, '0.0.0.0', async () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`✅ Server running on port ${PORT}`);
-      await verifyEmailConnection();
     });
 
   } catch (error) {
