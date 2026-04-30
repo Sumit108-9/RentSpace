@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import { createRazorpayOrder, loadRazorpayScript } from '../services/razorpay.service';
 import { sendOrderNotification } from '../services/firebase.service';
+import api from '../utils/api';
 
 const sx = {
   c: { padding: '40px 20px', maxWidth: 1200, margin: '0 auto', background: '#FAFAF8', minHeight: 'calc(100vh - 100px)', fontFamily: "'DM Sans',sans-serif" },
@@ -157,13 +158,7 @@ export default function Checkout() {
         discount
       };
 
-      const r = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-        body: JSON.stringify(body)
-      });
-
-      const d = await r.json();
+      const { data: d } = await api.post('/orders', body);
       if (d.success && d.order) {
         clear();
         try { await sendOrderNotification(d.order._id, cust.fullName); } catch (e) { }
@@ -210,7 +205,7 @@ export default function Checkout() {
       });
 
       const rzp = new window.Razorpay({
-        key: 'rzp_test_SeqjX7UcUPZRwI',
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_SeqjX7UcUPZRwI',
         amount: od.amount,
         currency: od.currency,
         name: 'RentSpace',

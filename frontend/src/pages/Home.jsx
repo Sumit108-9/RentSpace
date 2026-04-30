@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
+import api from '../utils/api';
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -8,15 +9,13 @@ const Home = () => {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const response = await fetch('/api/products?limit=4');
-        if (response.ok) {
-          const data = await response.json();
+        const response = await api.get('/products?limit=4');
+        const data = response.data;
           if (data.success && data.products?.length > 0) {
             setFeaturedProducts(data.products.slice(0, 4));
             return;
           }
-        }
-      } catch (err) {
+        } catch (err) {
         // Silently fail, will show empty state
       }
     };

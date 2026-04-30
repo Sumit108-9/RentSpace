@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import api from '../utils/api';
 import { Heart, Check, RotateCcw, Shield, Truck } from 'lucide-react';
 import useStore from '../store/useStore';
 import { ToastContext } from '../App';

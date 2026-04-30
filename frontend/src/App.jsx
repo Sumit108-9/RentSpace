@@ -65,7 +65,6 @@ const SafeCategories = () => (
 );
 
 function App() {
-  console.log('App rendering');
   
   const [toasts, setToasts] = useState([]);
 

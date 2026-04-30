@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
-import { verifyEmailConnection } from './config/email.config.js';
+import { verifyEmailConnection } from './config/email.js';
 import connectDB from './config/db.js';
 import { createLogger } from './config/logger.js';
 

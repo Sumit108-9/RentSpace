@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import api from '../utils/api';
 
 let setRehydratedFn = null;
 
@@ -286,8 +287,8 @@ const useStore = create(
             }
           }
 
-          const response = await fetch(`/api/products?${params}`);
-          const data = await response.json();
+          const response = await api.get(`/products?${params}`);
+          const data = response.data;
 
           if (data.success) {
             // Cache the response
@@ -321,8 +322,8 @@ const useStore = create(
             }
           }
 
-          const response = await fetch('/api/products/featured');
-          const data = await response.json();
+          const response = await api.get('/products/featured');
+          const data = response.data;
           if (data.success) {
             // Cache the response
             localStorage.setItem('rentspace_cache_/api/products/featured', JSON.stringify({
@@ -349,8 +350,8 @@ const useStore = create(
             }
           }
 
-          const response = await fetch(`/api/products/${id}`);
-          const data = await response.json();
+          const response = await api.get(`/products/${id}`);
+          const data = response.data;
           if (data.success) {
             // Cache the response
             localStorage.setItem(`rentspace_cache_/api/products/${id}`, JSON.stringify({
