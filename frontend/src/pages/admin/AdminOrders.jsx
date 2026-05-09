@@ -17,39 +17,26 @@ const TABS = ['all', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled'
 const STATUS_OPTIONS = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned'];
 
 const AdminOrders = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { adminOrders, adminOrdersLoading, fetchAdminOrders, updateAdminOrderStatus } = useStore();
   const [activeTab, setActiveTab] = useState('all');
   const [search, setSearch] = useState('');
   const [updating, setUpdating] = useState(null);
 
-  const getToken = () => useStore.getState().token || localStorage.getItem('token');
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${getToken()}` } });
-      const data = await res.json();
-      if (data.success) setOrders(data.orders || []);
-    } catch (e) {}
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchOrders(); }, []);
+  useEffect(() => {
+    fetchAdminOrders();
+  }, [fetchAdminOrders]);
 
   const handleStatusChange = async (orderId, newStatus) => {
     setUpdating(orderId);
-    try {
-      const res = await fetch(`/api/admin/orders/${orderId}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify({ status: newStatus })
-      });
-      const data = await res.json();
-      if (data.success) fetchOrders();
-    } catch (e) {}
+    const success = await updateAdminOrderStatus(orderId, newStatus);
+    if (!success) {
+      alert('Failed to update order status');
+    }
     setUpdating(null);
   };
+
+  const orders = adminOrders;
+  const loading = adminOrdersLoading;
 
   const filtered = orders.filter(o => {
     if (activeTab !== 'all' && o.orderStatus !== activeTab) return false;

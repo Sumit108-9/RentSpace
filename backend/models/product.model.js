@@ -25,7 +25,8 @@ const reviewSchema = new mongoose.Schema({
 const productSchema = new mongoose.Schema({
   _id: {
     type: String,
-    required: true
+    required: false,
+    default: () => new mongoose.Types.ObjectId().toString()
   },
   name: {
     type: String,
@@ -50,11 +51,16 @@ const productSchema = new mongoose.Schema({
   },
   images: [{
     type: String,
-    required: true
+    required: false
   }],
   monthlyRent: {
     type: Number,
     required: [true, 'Monthly rent is required'],
+    min: 0
+  },
+  securityDeposit: {
+    type: Number,
+    default: 0,
     min: 0
   },
   originalPrice: {

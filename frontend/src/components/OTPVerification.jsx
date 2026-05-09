@@ -91,7 +91,7 @@ const OTPVerification = ({ email, onSuccess, onClose }) => {
       const data = response.data;
 
       if (data.success) {
-        setTimeLeft(300); // Reset timer
+        setTimeLeft(30); // Reset timer to 30 seconds for resend
         setOtp(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
       } else {
@@ -174,7 +174,7 @@ const OTPVerification = ({ email, onSuccess, onClose }) => {
         <div className="text-center">
           <button
             onClick={handleResend}
-            disabled={resendLoading || timeLeft > 240}
+            disabled={resendLoading || timeLeft > 0}
             className="inline-flex items-center gap-2 text-[#063831] hover:underline disabled:text-gray-400 disabled:no-underline text-sm"
           >
             <RefreshCw className={`w-4 h-4 ${resendLoading ? 'animate-spin' : ''}`} />

@@ -74,7 +74,14 @@ const Cart = () => {
           return (
             <div key={item.cartItemId} style={{ background: '#fff', border: '0.5px solid #E8E6DF', borderRadius: 12, padding: 20, display: 'flex', gap: 16, marginBottom: 16, alignItems: 'center', transition: 'all 0.15s' }}>
               <div style={{ width: 100, height: 80, background: '#F5F4F0', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, flexShrink: 0, border: '0.5px solid #E8E6DF', overflow: 'hidden' }}>
-                {image ? <img src={image} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '🛋'}
+                {image ? (
+                  <img 
+                    src={image} 
+                    alt={p.name} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '🛋'; }}
+                  />
+                ) : '🛋'}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 500, fontSize: 16, marginBottom: 4, color: '#2C2C2A' }}>{p.name}</div>

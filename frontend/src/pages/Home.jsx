@@ -19,23 +19,10 @@ const Home = () => {
         // Silently fail, will show empty state
       }
     };
+
     fetchFeaturedProducts();
   }, []);
 
-  const categories = [
-    { name: 'Sofas', slug: 'sofa', count: '32', icon: '🛋' },
-    { name: 'Beds', slug: 'bed', count: '28', icon: '🛏' },
-    { name: 'Tables', slug: 'table', count: '24', icon: '🪑' },
-    { name: 'Chairs', slug: 'chair', count: '18', icon: '🪟' },
-    { name: 'Appliances', slug: 'appliance', count: '16', icon: '🧺' },
-  ];
-
-  const sampleProducts = [
-    { name: '3 Seater Sofa', price: '1,299', rating: '4.5', reviews: '120', icon: '🛋', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600' },
-    { name: 'Queen Size Bed', price: '1,599', rating: '4.6', reviews: '98', icon: '🛏', image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600' },
-    { name: 'Dining Table Set', price: '1,199', rating: '4.4', reviews: '78', icon: '🍽', image: 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=600' },
-    { name: 'Accent Chair', price: '699', rating: '4.3', reviews: '40', icon: '🪑', image: 'https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600' },
-  ];
 
   const trustItems = [
     { icon: '🚚', label: 'Free Delivery', sub: 'On all orders' },
@@ -51,9 +38,9 @@ const Home = () => {
     { icon: '📞', title: 'Support 24/7', sub: 'We are always here' },
   ];
 
-  const products = featuredProducts.length > 0 ? featuredProducts.map(p => ({
-    name: p.name, price: p.monthlyRent ?? p.rentPrice, rating: p.rating || '4.5', reviews: p.numReviews || '24', icon: '🛋', id: p._id, image: p.images?.[0]
-  })) : sampleProducts;
+  const products = featuredProducts.map(p => ({
+    name: p.name, price: p.monthlyRent ?? p.rentPrice, rating: p.rating || '0', reviews: p.numReviews || '0', icon: '🛋', id: p._id, image: p.images?.[0]
+  }));
 
   return (
     <div style={{ padding: '32px 64px' }}>
@@ -96,14 +83,21 @@ const Home = () => {
           <h2 style={{ fontSize: 26, fontWeight: 500, color: '#2C2C2A', fontFamily: "'Playfair Display', serif" }}>Featured Products</h2>
           <Link to="/products" style={{ fontSize: 18, color: '#1D9E75', textDecoration: 'none', transition: 'color 0.15s' }}>View all →</Link>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 28 }}>
-          {products.map((product, idx) => (
-            <Link to={product.id ? `/products/${product.id}` : '/products'} key={idx} style={{ textDecoration: 'none' }}>
+        {products.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', background: '#FAFAF8', borderRadius: 12, border: '0.5px solid #E8E6DF' }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>📦</div>
+            <div style={{ fontSize: 20, color: '#2C2C2A', marginBottom: 8, fontWeight: 500 }}>No products available</div>
+            <div style={{ fontSize: 16, color: '#888780' }}>Products will appear here once added by the admin.</div>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 28 }}>
+            {products.map((product, idx) => (
+              <Link to={product.id ? `/products/${product.id}` : '/products'} key={idx} style={{ textDecoration: 'none' }}>
               <div onMouseEnter={e => { e.currentTarget.style.borderColor = '#1D9E75'; e.currentTarget.style.transform = 'translateY(-6px)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = '#E8E6DF'; e.currentTarget.style.transform = 'translateY(0)'; }} style={{ background: '#fff', border: '0.5px solid #E8E6DF', borderRadius: 16, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s' }}>
                 <div style={{ height: 250, background: '#F5F4F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 54, position: 'relative', overflow: 'hidden' }}>
                   {product.image ? (
-                    <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : product.icon}
+                    <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '🛋'; }} />
+                  ) : '🛋'}
                   <div style={{ position: 'absolute', top: 16, right: 16, width: 44, height: 44, background: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '0.5px solid #E8E6DF' }}>
                     <Heart style={{ width: 22, height: 22, stroke: '#888780', fill: 'none' }} />
                   </div>
@@ -119,6 +113,7 @@ const Home = () => {
             </Link>
           ))}
         </div>
+      )}
       </section>
 
       {/* Why Choose */}

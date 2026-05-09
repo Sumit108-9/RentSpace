@@ -4,6 +4,7 @@ import {
   getProductById,
   getFeaturedProducts,
   getCategories,
+  getCategoryCounts,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -22,6 +23,7 @@ const router = express.Router();
 router.get('/', getProducts);
 router.get('/featured', getFeaturedProducts);
 router.get('/categories', getCategories);
+router.get('/categories/counts', getCategoryCounts);
 router.get('/:id', validateProductId, getProductById);
 
 router.post('/', protect, adminOnly, validateProductCreation, createProduct);

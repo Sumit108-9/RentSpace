@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const orderItemSchema = new mongoose.Schema({
   product: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'Product',
     required: true
   },
@@ -32,10 +32,16 @@ const orderItemSchema = new mongoose.Schema({
 });
 
 const orderSchema = new mongoose.Schema({
-  orderNumber: {
+  orderId: {
     type: String,
     unique: true,
     index: true
+  },
+  orderNumber: {
+    type: String,
+    unique: true,
+    index: true,
+    sparse: true
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

@@ -17,32 +17,35 @@ const Orders = () => {
       setError('');
       
       if (!userId) {
-        setOrders([
-          { _id: 'ORD0012', name: '3 Seater Sofa', duration: 6, date: '10 May 2024', price: 7794, status: 'Active', icon: '🛋' },
-          { _id: 'ORD0011', name: 'Queen Size Bed', duration: 6, date: '05 May 2024', price: 9594, status: 'Delivered', icon: '🛏' },
-          { _id: 'ORD0010', name: 'Dining Table Set', duration: 3, date: '02 May 2024', price: 3597, status: 'Pending', icon: '🍽' },
-        ]);
+        setOrders([]);
         setLoading(false);
         return;
       }
       
       try {
-        const response = await api.get(`/orders/user/${userId}`);
+        const response = await api.get('/orders');
         const data = response.data;
         if (data.success) {
-          setOrders(data.orders || []);
+          // Transform real orders to match the display format
+          const transformedOrders = data.orders?.map(order => ({
+            _id: order.orderNumber || order._id,
+            name: order.orderItems?.[0]?.name || 'Furniture Rental',
+            duration: order.orderItems?.[0]?.rentalDuration || 3,
+            date: new Date(order.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            price: order.totalAmount,
+            status: order.orderStatus === 'pending' ? 'Pending' : 
+                    order.orderStatus === 'delivered' ? 'Delivered' : 
+                    order.orderStatus === 'cancelled' ? 'Cancelled' : 'Active',
+            image: order.orderItems?.[0]?.image,
+            icon: '📦'
+          })) || [];
+          setOrders(transformedOrders);
         } else {
           setError(data.message || 'Failed to load orders');
         }
       } catch (err) {
         console.error('Failed to fetch orders:', err);
         setError('Unable to load orders. Please try again later.');
-        // Fallback to mock data
-        setOrders([
-          { _id: 'ORD0012', name: '3 Seater Sofa', duration: 6, date: '10 May 2024', price: 7794, status: 'Active', icon: '🛋' },
-          { _id: 'ORD0011', name: 'Queen Size Bed', duration: 6, date: '05 May 2024', price: 9594, status: 'Delivered', icon: '🛏' },
-          { _id: 'ORD0010', name: 'Dining Table Set', duration: 3, date: '02 May 2024', price: 3597, status: 'Pending', icon: '🍽' },
-        ]);
       } finally {
         setLoading(false);
       }
@@ -81,14 +84,18 @@ const Orders = () => {
       )}
       
       {!loading && filteredOrders.length === 0 && (
-        <div style={{ textAlign: 'center', padding: 40, color: '#888780' }}>
-          No orders found.
+        <div style={{ textAlign: 'center', padding: '60px 20px', background: '#FAFAF8', borderRadius: 12, border: '0.5px solid #E8E6DF' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>📦</div>
+          <div style={{ fontSize: 20, color: '#2C2C2A', marginBottom: 8, fontWeight: 500 }}>No orders yet</div>
+          <div style={{ fontSize: 16, color: '#888780' }}>Your orders will appear here once you make a purchase.</div>
         </div>
       )}
       
       {filteredOrders.map((order) => (
         <div key={order._id} style={{ background: '#fff', border: '0.5px solid #e8e6df', borderRadius: 12, padding: '20px 28px', display: 'flex', gap: 20, alignItems: 'center', marginBottom: 16 }}>
-          <div style={{ width: 72, height: 72, background: '#f5f4f0', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, flexShrink: 0 }}>{order.icon}</div>
+          <div style={{ width: 72, height: 72, background: '#f5f4f0', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, flexShrink: 0, overflow: 'hidden' }}>
+            {order.image ? <img src={order.image} alt={order.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : order.icon}
+          </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 15, color: '#888780', marginBottom: 4 }}>#{order._id}</div>
             <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 4, color: '#2C2C2A' }}>{order.name}</div>
@@ -97,7 +104,7 @@ const Orders = () => {
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 22, fontWeight: 700, color: '#2C2C2A', marginBottom: 6 }}>₹{order.price.toLocaleString('en-IN')}</div>
             {getStatusBadge(order.status)}
-            <Link to={`/products/${order._id}`} style={{ fontSize: 15, color: '#1D9E75', cursor: 'pointer', marginTop: 8, display: 'block', textDecoration: 'none' }}>View Details →</Link>
+            <Link to={`/orders/${order._id}`} style={{ fontSize: 15, color: '#1D9E75', cursor: 'pointer', marginTop: 8, display: 'block', textDecoration: 'none' }}>View Details →</Link>
           </div>
         </div>
       ))}

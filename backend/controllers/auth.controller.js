@@ -4,7 +4,7 @@ import User from '../models/user.model.js';
 import Otp from '../models/otp.model.js';
 import PasswordReset from '../models/passwordReset.model.js';
 import { body, validationResult } from 'express-validator';
-import { sendWelcomeEmail, sendPasswordResetEmail, sendVerificationEmail } from '../services/email.service.js';
+import { sendWelcomeEmail, sendPasswordResetEmail, sendVerificationEmail, sendPasswordChangedEmail } from '../services/email.service.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -34,16 +34,11 @@ export const register = [
         name,
         email,
         password,
-        phone
+        phone,
+        role: 'user'
       });
 
-      // Generate and send OTP for email verification
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      await Otp.create({ email, otp });
-      sendVerificationEmail(email, otp).catch(emailError => {
-        console.error('Failed to send verification email:', emailError.message);
-      });
-
+      // Send response immediately - don't wait for OTP/email
       res.status(201).json({
         success: true,
         message: 'User registered successfully. Please verify your email with OTP.',
@@ -56,6 +51,15 @@ export const register = [
           isEmailVerified: false
         }
       });
+
+      // Generate and send OTP for email verification (fire-and-forget)
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      Otp.create({ email, otp })
+        .then(() => sendVerificationEmail(email, otp))
+        .then(() => console.log('✅ Verification email sent to:', email))
+        .catch(emailError => {
+          console.error('Failed to send verification email:', emailError.message);
+        });
     } catch (error) {
       next(error);
     }
@@ -73,15 +77,19 @@ export const login = [
       }
 
       const { email, password } = req.body;
+      console.log('Login attempt:', { email, passwordLength: password?.length });
 
       const user = await User.findOne({ email }).select('+password');
       if (!user) {
-        return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        console.log('User not found:', email);
+        return res.status(401).json({ success: false, message: 'Invalid credentials - user not found' });
       }
 
       const isMatch = await user.comparePassword(password);
+      console.log('Password match:', isMatch);
       if (!isMatch) {
-        return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        console.log('Wrong password for:', email);
+        return res.status(401).json({ success: false, message: 'Invalid credentials - wrong password' });
       }
 
       res.json({
@@ -161,15 +169,16 @@ export const forgotPassword = async (req, res, next) => {
     const { email } = req.body;
     console.log('Forgot password request for email:', email);
 
-    // Find user by email
+    // Find user by email (could be regular user or admin)
     const user = await User.findOne({ email });
-    console.log('User found:', user ? 'Yes' : 'No');
+    console.log('User found:', user ? 'Yes' : 'No', 'Role:', user?.role);
     
     if (!user) {
-      // For security, don't reveal if email exists or not
-      return res.status(200).json({
-        success: true,
-        message: 'If an account exists with this email, a password reset link has been sent.'
+      // Return user not found status
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+        userExists: false
       });
     }
 
@@ -196,9 +205,13 @@ export const forgotPassword = async (req, res, next) => {
       // Don't fail the request if email fails
     }
 
+    const userType = user.role === 'admin' ? 'Admin' : 'User';
     res.status(200).json({
       success: true,
-      message: 'If an account exists with this email, a password reset link has been sent.'
+      message: `Password reset instructions sent to ${userType} email: ${user.email}`,
+      userExists: true,
+      email: user.email,
+      role: user.role
     });
   } catch (error) {
     console.error('Forgot password error:', error);
@@ -303,6 +316,11 @@ export const resetPassword = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'Password has been reset successfully. Please login with your new password.'
+    });
+
+    // Send password changed confirmation email (fire-and-forget)
+    sendPasswordChangedEmail(user).catch(err => {
+      console.error('Failed to send password changed email:', err.message);
     });
   } catch (error) {
     next(error);

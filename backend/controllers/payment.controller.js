@@ -44,7 +44,7 @@ export const createOrder = async (req, res) => {
 
     // Create Razorpay order
     const options = {
-      amount: amount * 100, // Razorpay expects amount in paise (1 INR = 100 paise)
+      amount: amount, // Frontend already sends amount in paise (multiplied by 100)
       currency,
       receipt: receipt || `order_${Date.now()}`,
       notes: notes || {},

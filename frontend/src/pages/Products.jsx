@@ -18,6 +18,12 @@ const Products = () => {
     productsLoading,
     setProductFilters,
     fetchProducts,
+    getUserCart,
+    getUserWishlist,
+    addToCart,
+    updateCartItemQuantity,
+    removeFromCart,
+    addToWishlist,
   } = useStore((state) => ({
     products: state.products,
     productPagination: state.productPagination,
@@ -25,18 +31,26 @@ const Products = () => {
     productsLoading: state.productsLoading,
     setProductFilters: state.setProductFilters,
     fetchProducts: state.fetchProducts,
+    getUserCart: state.getUserCart,
+    getUserWishlist: state.getUserWishlist,
+    addToCart: state.addToCart,
+    updateCartItemQuantity: state.updateCartItemQuantity,
+    removeFromCart: state.removeFromCart,
+    addToWishlist: state.addToWishlist,
   }));
 
-  const userCart = useStore((s) => s.getUserCart());
-  const userWishlist = useStore((s) => s.getUserWishlist());
-  const addToCart = useStore((s) => s.addToCart);
-  const updateCartItemQuantity = useStore((s) => s.updateCartItemQuantity);
-  const removeFromCart = useStore((s) => s.removeFromCart);
-  const addToWishlist = useStore((s) => s.addToWishlist);
-  const removeFromWishlist = useStore((s) => s.removeFromWishlist);
+  const userCart = getUserCart();
+  const userWishlist = getUserWishlist();
 
-  // Sync URL category with store filters
+  // Clear stale cache on mount and sync URL category
   useEffect(() => {
+    // Clear product cache to ensure fresh data
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('rentspace_cache_/api/products')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
     const categoryFromUrl = searchParams.get('category') || '';
     if (categoryFromUrl !== productFilters.category) {
       setProductFilters({ category: categoryFromUrl });
@@ -171,7 +185,9 @@ const Products = () => {
               <Link to={`/products/${product._id || product.id}`} key={product._id || product.id || idx} style={{ textDecoration: 'none' }}>
                 <div onMouseEnter={e => { e.currentTarget.style.borderColor = '#1D9E75'; e.currentTarget.style.transform = 'translateY(-6px)'; }} onMouseLeave={e => { e.currentTarget.style.borderColor = '#E8E6DF'; e.currentTarget.style.transform = 'translateY(0)'; }} style={{ background: '#fff', border: '0.5px solid #E8E6DF', borderRadius: 16, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.15s' }}>
                   <div style={{ height: 260, background: '#F5F4F0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 64, position: 'relative' }}>
-                    {product.images?.[0] ? <img src={product.images[0]} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (product.category === 'bed' ? '🛏' : product.category === 'table' ? '🍽' : product.category === 'chair' ? '🪑' : product.category === 'storage' ? '🗄️' : '🛋️')}
+                    {product.images?.[0] ? (
+                    <img src={product.images[0]} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '🛋'; }} />
+                  ) : (product.category === 'bed' ? '🛏' : product.category === 'table' ? '🍽' : product.category === 'chair' ? '🪑' : product.category === 'storage' ? '🗄️' : '🛋️')}
                     <div 
                       onClick={(e) => {
                         e.preventDefault();

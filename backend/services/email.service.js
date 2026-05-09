@@ -37,7 +37,7 @@ export const sendWelcomeEmail = async (user) => {
           <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
             <tr>
               <td style="background-color: #2A7F74; padding: 30px 40px; border-radius: 8px 8px 0 0;">
-                <h1 style="margin: 0; color: #FFFFFF; font-size: 28px; font-weight: bold; letter-spacing: 1px;">RentSpace</h1>
+                <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 32px; font-weight: bold; color: #FFFFFF; letter-spacing: 2px;">RentSpace</div>
                 <p style="margin: 5px 0 0 0; color: #E9DFD2; font-size: 14px;">Premium Furniture, Flexible Living</p>
               </td>
             </tr>
@@ -86,7 +86,7 @@ export const sendWelcomeEmail = async (user) => {
             </tr>
             <tr>
               <td style="background-color: #E9DFD2; padding: 30px 40px; border-radius: 0 0 8px 8px;">
-                <p style="margin: 0; color: #7A7A7A; font-size: 13px;">© 2025 RentSpace. All rights reserved.</p>
+                <p style="margin: 0; color: #7A7A7A; font-size: 13px;">© 2026 RentSpace. All rights reserved.</p>
               </td>
             </tr>
           </table>
@@ -260,7 +260,7 @@ export const sendPasswordResetEmail = async (user, resetToken) => {
           <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
             <tr>
               <td style="background-color: #2A7F74; padding: 30px 40px; border-radius: 8px 8px 0 0;">
-                <h1 style="margin: 0; color: #FFFFFF; font-size: 28px; font-weight: bold; letter-spacing: 1px;">RentSpace</h1>
+                <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 32px; font-weight: bold; color: #FFFFFF; letter-spacing: 2px;">RentSpace</div>
                 <p style="margin: 5px 0 0 0; color: #E9DFD2; font-size: 14px;">Premium Furniture, Flexible Living</p>
               </td>
             </tr>
@@ -290,7 +290,7 @@ export const sendPasswordResetEmail = async (user, resetToken) => {
             </tr>
             <tr>
               <td style="background-color: #E9DFD2; padding: 30px 40px; border-radius: 0 0 8px 8px;">
-                <p style="margin: 0; color: #7A7A7A; font-size: 13px;">© 2025 RentSpace. All rights reserved.</p>
+                <p style="margin: 0; color: #7A7A7A; font-size: 13px;">© 2026 RentSpace. All rights reserved.</p>
               </td>
             </tr>
           </table>
@@ -317,7 +317,7 @@ export const sendNewCollectionEmail = async (user, collectionName = 'Summer 2025
           <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
             <tr>
               <td style="background-color: #2A7F74; padding: 30px 40px; border-radius: 8px 8px 0 0;">
-                <h1 style="margin: 0; color: #FFFFFF; font-size: 28px; font-weight: bold; letter-spacing: 1px;">RentSpace</h1>
+                <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 32px; font-weight: bold; color: #FFFFFF; letter-spacing: 2px;">RentSpace</div>
                 <p style="margin: 5px 0 0 0; color: #E9DFD2; font-size: 14px;">Premium Furniture, Flexible Living</p>
               </td>
             </tr>
@@ -389,7 +389,7 @@ export const sendNewCollectionEmail = async (user, collectionName = 'Summer 2025
             </tr>
             <tr>
               <td style="background-color: #E9DFD2; padding: 30px 40px; border-radius: 0 0 8px 8px;">
-                <p style="margin: 0; color: #7A7A7A; font-size: 13px;">© 2025 RentSpace. All rights reserved.</p>
+                <p style="margin: 0; color: #7A7A7A; font-size: 13px;">© 2026 RentSpace. All rights reserved.</p>
                 <p style="margin: 15px 0 0 0; color: #7A7A7A; font-size: 12px;">
                   <a href="#" style="color: #7A7A7A; text-decoration: underline;">Unsubscribe</a>
                 </p>
@@ -419,7 +419,7 @@ export const sendVerificationEmail = async (email, otp) => {
           <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
             <tr>
               <td style="background-color: #2A7F74; padding: 30px 40px; border-radius: 8px 8px 0 0;">
-                <h1 style="margin: 0; color: #FFFFFF; font-size: 28px; font-weight: bold; letter-spacing: 1px;">RentSpace</h1>
+                <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 32px; font-weight: bold; color: #FFFFFF; letter-spacing: 2px;">RentSpace</div>
                 <p style="margin: 5px 0 0 0; color: #E9DFD2; font-size: 14px;">Premium Furniture, Flexible Living</p>
               </td>
             </tr>
@@ -439,7 +439,7 @@ export const sendVerificationEmail = async (email, otp) => {
             </tr>
             <tr>
               <td style="background-color: #E9DFD2; padding: 30px 40px; border-radius: 0 0 8px 8px;">
-                <p style="margin: 0; color: #7A7A7A; font-size: 13px;">© 2025 RentSpace. All rights reserved.</p>
+                <p style="margin: 0; color: #7A7A7A; font-size: 13px;">© 2026 RentSpace. All rights reserved.</p>
               </td>
             </tr>
           </table>
@@ -496,7 +496,7 @@ export const sendOrderConfirmationEmail = async (user, order) => {
               <td style="background-color: #FFFFFF; padding: 30px 40px; border-left: 1px solid #D8CFBF; border-right: 1px solid #D8CFBF;">
                 <h3 style="margin: 0 0 20px 0; color: #1A1A1A; font-size: 18px; border-bottom: 2px solid #2A7F74; padding-bottom: 10px;">Order Details</h3>
                 <table width="100%" style="margin-bottom: 20px;">
-                  <tr><td style="padding: 8px 0; color: #666;">Order ID</td><td style="padding: 8px 0; text-align: right; font-weight: bold; color: #1A1A1A;">#${_id?.slice(-8)?.toUpperCase()}</td></tr>
+                  <tr><td style="padding: 8px 0; color: #666;">Order ID</td><td style="padding: 8px 0; text-align: right; font-weight: bold; color: #1A1A1A;">#${_id?.toString()?.slice(-8)?.toUpperCase()}</td></tr>
                   <tr><td style="padding: 8px 0; color: #666;">Payment Status</td><td style="padding: 8px 0; text-align: right; font-weight: bold; color: #1D9E75;">PAID</td></tr>
                   <tr><td style="padding: 8px 0; color: #666;">Rental Duration</td><td style="padding: 8px 0; text-align: right; font-weight: bold; color: #1A1A1A;">${rentalDuration || '3 months'}</td></tr>
                   <tr><td style="padding: 8px 0; color: #666;">Payment Method</td><td style="padding: 8px 0; text-align: right; font-weight: bold; color: #1A1A1A;">${paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}</td></tr>
@@ -523,7 +523,7 @@ export const sendOrderConfirmationEmail = async (user, order) => {
                   <tr><td style="padding: 8px 0; color: #666;">Subtotal</td><td style="padding: 8px 0; text-align: right; font-weight: 500;">₹${(totalPrice * 0.9).toLocaleString()}</td></tr>
                   <tr><td style="padding: 8px 0; color: #666;">Delivery Fee</td><td style="padding: 8px 0; text-align: right; font-weight: 500;">${totalPrice > 5000 ? 'FREE' : '₹299'}</td></tr>
                   <tr><td style="padding: 8px 0; color: #666;">Security Deposit (Refundable)</td><td style="padding: 8px 0; text-align: right; font-weight: 500;">₹${(totalPrice * 0.1).toLocaleString()}</td></tr>
-                  ${discount > 0 ? `<tr><td style="padding: 8px 0; color: #1D9E75;">Discount</td><td style="padding: 8px 0; text-align: right; font-weight: 500; color: #1D9E75;">-₹'0'</td></tr>` : ''}
+                  ${(order?.discount || 0) > 0 ? `<tr><td style="padding: 8px 0; color: #1D9E75;">Discount</td><td style="padding: 8px 0; text-align: right; font-weight: 500; color: #1D9E75;">-₹${(order.discount).toLocaleString()}</td></tr>` : ''}
                   <tr><td colspan="2" style="border-top: 2px solid #2A7F74; padding-top: 15px;"></td></tr>
                   <tr><td style="padding: 10px 0; font-size: 18px; font-weight: bold; color: #1A1A1A;">TOTAL AMOUNT</td><td style="padding: 10px 0; text-align: right; font-size: 20px; font-weight: bold; color: #1D9E75;">₹${totalPrice.toLocaleString()}</td></tr>
                 </table>
@@ -546,7 +546,7 @@ export const sendOrderConfirmationEmail = async (user, order) => {
             <!-- Footer -->
             <tr>
               <td style="background-color: #E9DFD2; padding: 30px 40px; border-radius: 0 0 8px 8px; text-align: center;">
-                <p style="margin: 0 0 10px 0; color: #7A7A7A; font-size: 13px;">© 2025 RentSpace. All rights reserved.</p>
+                <p style="margin: 0 0 10px 0; color: #7A7A7A; font-size: 13px;">© 2026 RentSpace. All rights reserved.</p>
                 <p style="margin: 0; color: #7A7A7A; font-size: 12px;">Questions? Contact us at support@rentspace.com</p>
               </td>
             </tr>
@@ -556,7 +556,53 @@ export const sendOrderConfirmationEmail = async (user, order) => {
     </table>
   `;
 
-  const text = `RentSpace Order Confirmation\n\nHi ${user?.name || 'Customer'},\n\nYour order #${_id?.slice(-8)} has been placed successfully!\n\nOrder Details:\n${orderItems?.map(i => `- ${i.product?.name || 'Product'} x${i.quantity}: ₹${((i.monthlyRent || i.price || 0)*i.quantity).toLocaleString()}`).join('\n') || ''}\n\nTotal: ₹${totalPrice?.toLocaleString()}\nDelivery Address: ${shippingAddress?.houseNo || ''}, ${shippingAddress?.street || ''}, ${shippingAddress?.city || ''}, ${shippingAddress?.state || ''} - ${shippingAddress?.pincode || ''}\n\nThank you for choosing RentSpace!`;
+  const text = `RentSpace Order Confirmation\n\nHi ${user?.name || 'Customer'},\n\nYour order #${_id?.toString()?.slice(-8)} has been placed successfully!\n\nOrder Details:\n${orderItems?.map(i => `- ${i.product?.name || 'Product'} x${i.quantity}: ₹${((i.monthlyRent || i.price || 0)*i.quantity).toLocaleString()}`).join('\n') || ''}\n\nTotal: ₹${totalPrice?.toLocaleString()}\nDelivery Address: ${shippingAddress?.houseNo || ''}, ${shippingAddress?.street || ''}, ${shippingAddress?.city || ''}, ${shippingAddress?.state || ''} - ${shippingAddress?.pincode || ''}\n\nThank you for choosing RentSpace!`;
+
+  return await sendEmail({ to: user?.email, subject, html, text });
+};
+
+/**
+ * Password Changed Confirmation Email
+ */
+export const sendPasswordChangedEmail = async (user) => {
+  const subject = 'Your RentSpace Password Has Been Changed';
+  
+  const html = `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8F4ED; font-family: Arial, Helvetica, sans-serif;">
+      <tr>
+        <td align="center" style="padding: 40px 20px;">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; border-radius: 8px; overflow: hidden;">
+            <tr>
+              <td style="background-color: #2A7F74; padding: 30px 40px;">
+                <h1 style="margin: 0; color: #FFFFFF; font-size: 28px; font-weight: bold;">RentSpace</h1>
+                <p style="margin: 5px 0 0 0; color: #E9DFD2; font-size: 14px;">Premium Furniture, Flexible Living</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="background-color: #FFFFFF; padding: 40px; text-align: center; border-left: 1px solid #D8CFBF; border-right: 1px solid #D8CFBF;">
+                <h2 style="margin: 0; color: #1D9E75; font-size: 24px; font-weight: bold;">Password Changed Successfully!</h2>
+                <p style="margin: 20px 0; color: #555; font-size: 16px; line-height: 1.6;">
+                  Hi ${user?.name || 'Customer'},<br><br>
+                  Your password has been successfully changed. If you did not make this change, please contact us immediately.
+                </p>
+                <div style="margin: 30px 0; padding: 20px; background-color: #F5F5F5; border-radius: 8px;">
+                  <p style="margin: 0; color: #666; font-size: 14px;">Changed at: ${new Date().toLocaleString()}</p>
+                </div>
+                <a href="${process.env.FRONTEND_URL}/login" style="display: inline-block; padding: 12px 30px; background-color: #2A7F74; color: #FFFFFF; text-decoration: none; border-radius: 6px; font-weight: bold;">Login to Your Account</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="background-color: #2C2C2A; padding: 20px; text-align: center;">
+                <p style="margin: 0; color: #9A9A9A; font-size: 12px;">Questions? Contact us at support@rentspace.com</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  const text = `RentSpace - Password Changed\n\nHi ${user?.name || 'Customer'},\n\nYour password has been successfully changed.\n\nChanged at: ${new Date().toLocaleString()}\n\nIf you did not make this change, please contact us immediately at support@rentspace.com`;
 
   return await sendEmail({ to: user?.email, subject, html, text });
 };

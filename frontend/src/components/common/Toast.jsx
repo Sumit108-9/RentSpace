@@ -81,8 +81,15 @@ export const ToastContainer = ({ toasts, removeToast }) => {
               border: '0.5px solid #e8e6df', boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
               fontFamily: "'DM Sans', sans-serif", minWidth: 200
             }}>
-            {t.title && <div style={{ fontWeight: 600, marginBottom: 4 }}>{t.title}</div>}
-            <div>{t.message}</div>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+              <span style={{ fontSize: 18, flexShrink: 0 }}>
+                {t.type === 'success' ? '✅' : t.type === 'error' ? '❌' : t.type === 'warning' ? '⚠️' : 'ℹ️'}
+              </span>
+              <div style={{ flex: 1 }}>
+                {t.title && <div style={{ fontWeight: 600, marginBottom: 2 }}>{t.title}</div>}
+                <div>{t.message}</div>
+              </div>
+            </div>
           </div>
         ))}
       </div>

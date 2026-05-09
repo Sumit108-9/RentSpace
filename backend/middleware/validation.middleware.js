@@ -137,7 +137,7 @@ export const validateOrderCreation = [
   body('contactInfo.name').notEmpty().withMessage('Contact name is required'),
   body('contactInfo.email').isEmail().withMessage('Valid email is required'),
   body('contactInfo.phone').notEmpty().withMessage('Phone number is required'),
-  body('paymentMethod').isIn(['card', 'upi', 'netbanking', 'cod']).withMessage('Invalid payment method'),
+  body('paymentMethod').isIn(['card', 'upi', 'netbanking', 'cod', 'razorpay']).withMessage('Invalid payment method'),
   body('paymentType').isIn(['Full', 'Installment']).withMessage('Payment type must be Full or Installment'),
   body('rentalStartDate').isISO8601().withMessage('Valid rental start date is required'),
   body('rentalEndDate').isISO8601().withMessage('Valid rental end date is required'),
@@ -146,7 +146,7 @@ export const validateOrderCreation = [
 ];
 
 export const validateInstallmentPayment = [
-  body('paymentMethod').isIn(['card', 'upi', 'netbanking', 'cod']).withMessage('Invalid payment method'),
+  body('paymentMethod').isIn(['card', 'upi', 'netbanking', 'cod', 'razorpay']).withMessage('Invalid payment method'),
   body('paymentId').optional().isString().withMessage('Payment ID must be a string'),
   
   handleValidationErrors
@@ -160,8 +160,8 @@ export const validateProductCreation = [
     .isLength({ min: 2, max: 100 }).withMessage('Product name must be between 2 and 100 characters'),
   
   body('description')
+    .optional()
     .trim()
-    .notEmpty().withMessage('Description is required')
     .isLength({ min: 5, max: 2000 }).withMessage('Description must be between 5 and 2000 characters'),
   
   body('category')
@@ -170,27 +170,37 @@ export const validateProductCreation = [
     .isIn(['sofa', 'bed', 'table', 'chair', 'wardrobe', 'decor', 'dining', 'storage'])
     .withMessage('Invalid category'),
   
-  body('price')
-    .notEmpty().withMessage('Price is required')
-    .isFloat({ min: 0 }).withMessage('Price must be a positive number'),
+  body('monthlyRent')
+    .notEmpty().withMessage('Monthly rent is required')
+    .isFloat({ min: 0 }).withMessage('Monthly rent must be a positive number'),
   
-  body('rentalPeriods')
-    .isArray({ min: 1 }).withMessage('At least one rental period is required'),
-  
-  body('stock')
+  body('securityDeposit')
     .optional()
-    .isInt({ min: 0 }).withMessage('Stock must be a non-negative integer'),
+    .isFloat({ min: 0 }).withMessage('Security deposit must be a non-negative number'),
+  
+  body('countInStock')
+    .optional()
+    .isInt({ min: 0 }).withMessage('Stock count must be a non-negative integer'),
   
   body('images')
     .optional()
     .isArray().withMessage('Images must be an array'),
+  
+  body('isFeatured')
+    .optional()
+    .isBoolean().withMessage('isFeatured must be a boolean'),
+  
+  body('isActive')
+    .optional()
+    .isBoolean().withMessage('isActive must be a boolean'),
   
   handleValidationErrors
 ];
 
 export const validateProductUpdate = [
   param('id')
-    .isMongoId().withMessage('Invalid product ID'),
+    .notEmpty().withMessage('Product ID is required')
+    .trim(),
   
   body('name')
     .optional()
@@ -200,7 +210,7 @@ export const validateProductUpdate = [
   body('description')
     .optional()
     .trim()
-    .isLength({ min: 10, max: 2000 }).withMessage('Description must be between 10 and 2000 characters'),
+    .isLength({ min: 5, max: 2000 }).withMessage('Description must be between 5 and 2000 characters'),
   
   body('category')
     .optional()
@@ -208,13 +218,29 @@ export const validateProductUpdate = [
     .isIn(['sofa', 'bed', 'table', 'chair', 'wardrobe', 'decor', 'dining', 'storage'])
     .withMessage('Invalid category'),
   
-  body('price')
+  body('monthlyRent')
     .optional()
-    .isFloat({ min: 0 }).withMessage('Price must be a positive number'),
+    .isFloat({ min: 0 }).withMessage('Monthly rent must be a positive number'),
   
-  body('stock')
+  body('securityDeposit')
     .optional()
-    .isInt({ min: 0 }).withMessage('Stock must be a non-negative integer'),
+    .isFloat({ min: 0 }).withMessage('Security deposit must be a non-negative number'),
+  
+  body('countInStock')
+    .optional()
+    .isInt({ min: 0 }).withMessage('Stock count must be a non-negative integer'),
+  
+  body('images')
+    .optional()
+    .isArray().withMessage('Images must be an array'),
+  
+  body('isFeatured')
+    .optional()
+    .isBoolean().withMessage('isFeatured must be a boolean'),
+  
+  body('isActive')
+    .optional()
+    .isBoolean().withMessage('isActive must be a boolean'),
   
   handleValidationErrors
 ];

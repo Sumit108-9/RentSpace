@@ -7,6 +7,7 @@ export const getProducts = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     let query = { isActive: true };
+    console.log('getProducts called with query:', req.query);
 
     if (req.query.category) {
       query.category = req.query.category;
@@ -57,6 +58,7 @@ export const getProducts = async (req, res, next) => {
       .lean();
 
     const total = await Product.countDocuments(query);
+    console.log('Products found:', products.length, 'Total count:', total);
 
     res.json({
       success: true,
@@ -109,6 +111,19 @@ export const getCategories = async (req, res, next) => {
   try {
     const categories = await Product.distinct('category');
     res.json({ success: true, categories });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCategoryCounts = async (req, res, next) => {
+  try {
+    const categoryCounts = await Product.aggregate([
+      { $match: { isActive: true } },
+      { $group: { _id: '$category', count: { $sum: 1 } } },
+      { $project: { category: '$_id', count: 1, _id: 0 } }
+    ]);
+    res.json({ success: true, categories: categoryCounts });
   } catch (error) {
     next(error);
   }

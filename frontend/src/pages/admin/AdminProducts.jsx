@@ -4,7 +4,7 @@ import useStore from '../../store/useStore';
 
 const CATEGORIES = ['sofa', 'bed', 'table', 'chair', 'wardrobe', 'decor', 'dining', 'storage'];
 
-const EMPTY_FORM = { name: '', description: '', category: 'sofa', monthlyRent: '', securityDeposit: '', countInStock: '10', images: '', isFeatured: false, isActive: true };
+const EMPTY_FORM = { name: '', description: '', category: 'sofa', monthlyRent: '', securityDeposit: '', countInStock: '10', images: [], isFeatured: false, isActive: true };
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -14,6 +14,7 @@ const AdminProducts = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('all');
 
@@ -37,7 +38,7 @@ const AdminProducts = () => {
 
   useEffect(() => { fetchProducts(); }, []);
 
-  const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setError(''); setShowModal(true); };
+  const openAdd = () => { setEditingId(null); setForm(EMPTY_FORM); setImagePreviews([]); setError(''); setShowModal(true); };
 
   const openEdit = (p) => {
     setEditingId(p._id);
@@ -48,17 +49,43 @@ const AdminProducts = () => {
       monthlyRent: p.monthlyRent?.toString() || '',
       securityDeposit: p.securityDeposit?.toString() || '0',
       countInStock: p.countInStock?.toString() || '10',
-      images: (p.images || []).join(', '),
+      images: (p.images || []),
       isFeatured: p.isFeatured || false,
       isActive: p.isActive !== false
     });
+    setImagePreviews(p.images || []);
     setError('');
     setShowModal(true);
+  };
+
+  const clearUserProductCache = () => {
+    // Clear user product cache so they see updated data immediately
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('rentspace_cache_/api/products')) {
+        localStorage.removeItem(key);
+      }
+    });
   };
 
   const handleSave = async () => {
     if (!form.name || !form.monthlyRent || !form.category) { setError('Name, rent, and category are required'); return; }
     setSaving(true); setError('');
+    
+    // Convert images to base64 if needed
+    const processedImages = await Promise.all(form.images.map((image, idx) => {
+      // If image is a File object, convert it to base64
+      // Otherwise, use it as-is (already base64 string)
+      if (image instanceof File) {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(image);
+        });
+      } else {
+        return Promise.resolve(image); // Already a base64 string
+      }
+    }));
+    
     const body = {
       name: form.name,
       description: form.description || 'No description',
@@ -66,7 +93,7 @@ const AdminProducts = () => {
       monthlyRent: Number(form.monthlyRent),
       securityDeposit: Number(form.securityDeposit) || 0,
       countInStock: Number(form.countInStock) || 10,
-      images: form.images ? form.images.split(',').map(s => s.trim()).filter(Boolean) : [],
+      images: processedImages,
       isFeatured: form.isFeatured,
       isActive: form.isActive
     };
@@ -76,6 +103,7 @@ const AdminProducts = () => {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` }, body: JSON.stringify(body) });
       const data = await res.json();
       if (!data.success) { setError(data.message || 'Failed to save'); setSaving(false); return; }
+      clearUserProductCache(); // Clear user cache for immediate sync
       setShowModal(false);
       fetchProducts();
     } catch (e) { setError('Network error'); }
@@ -87,7 +115,10 @@ const AdminProducts = () => {
     try {
       const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } });
       const data = await res.json();
-      if (data.success) fetchProducts();
+      if (data.success) {
+        clearUserProductCache(); // Clear user cache for immediate sync
+        fetchProducts();
+      }
     } catch (e) {}
   };
 
@@ -126,7 +157,9 @@ const AdminProducts = () => {
       {loading ? (
         <div style={{ padding: 40, textAlign: 'center', color: '#888780', fontSize: 15 }}>Loading products...</div>
       ) : filtered.length === 0 ? (
-        <div style={{ padding: 40, textAlign: 'center', color: '#888780', fontSize: 15 }}>No products found</div>
+        <div style={{ padding: 40, textAlign: 'center', color: '#888780', fontSize: 15 }}>
+          No products available. Please add products from Admin Panel.
+        </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
           {filtered.map(p => (
@@ -210,8 +243,164 @@ const AdminProducts = () => {
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>Image URLs (comma-separated)</label>
-              <input value={form.images} onChange={e => setForm({ ...form, images: e.target.value })} style={inputStyle} placeholder="https://example.com/img1.jpg, https://..." />
+              <label style={labelStyle}>Product Images</label>
+              <div
+                style={{
+                  border: '2px dashed #E8E6DF',
+                  borderRadius: 8,
+                  padding: 24,
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  background: '#FAFAF8'
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.style.borderColor = '#1D9E75';
+                  e.currentTarget.style.background = '#F0F9F4';
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.style.borderColor = '#E8E6DF';
+                  e.currentTarget.style.background = '#FAFAF8';
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.style.borderColor = '#E8E6DF';
+                  e.currentTarget.style.background = '#FAFAF8';
+                  
+                  const files = Array.from(e.dataTransfer.files);
+                  const imageFiles = files.filter(file => file.type.startsWith('image/'));
+                  
+                  if (imageFiles.length === 0) {
+                    setError('Please drop only image files');
+                    return;
+                  }
+                  
+                  // Store File objects and create preview URLs
+                  const previewUrls = imageFiles.map(file => URL.createObjectURL(file));
+                  setForm({ ...form, images: [...form.images, ...imageFiles] });
+                  setImagePreviews([...imagePreviews, ...previewUrls]);
+                }}
+                onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.multiple = true;
+                  input.accept = 'image/*';
+                  input.onchange = (e) => {
+                  const files = Array.from(e.target.files);
+                  const previewUrls = files.map(file => URL.createObjectURL(file));
+                  setForm({ ...form, images: [...form.images, ...files] });
+                  setImagePreviews([...imagePreviews, ...previewUrls]);
+                  };
+                  input.click();
+                }}
+              >
+                {form.images.length === 0 ? (
+                  <div>
+                    <div style={{ fontSize: 48, marginBottom: 8 }}>📸</div>
+                    <div style={{ fontSize: 14, color: '#888780', marginBottom: 8 }}>
+                      Drag & drop images here or click to browse
+                    </div>
+                    <div style={{ fontSize: 12, color: '#888780' }}>
+                      Supports: JPG, PNG, GIF, WebP
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ fontSize: 14, color: '#2C2C2A', marginBottom: 12 }}>
+                      {form.images.length} image{form.images.length !== 1 ? 's' : ''} selected
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                      {imagePreviews.map((img, idx) => (
+                        <div key={idx} style={{ position: 'relative', paddingBottom: '100%' }}>
+                          <img
+                            src={img}
+                            alt={`Preview ${idx + 1}`}
+                            style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              borderRadius: 4,
+                              border: '1px solid #E8E6DF'
+                            }}
+                          />
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newImages = form.images.filter((_, i) => i !== idx);
+                              const newPreviews = imagePreviews.filter((_, i) => i !== idx);
+                              setForm({ ...form, images: newImages });
+                              setImagePreviews(newPreviews);
+                            }}
+                            style={{
+                              position: 'absolute',
+                              top: 4,
+                              right: 4,
+                              background: '#B91C1C',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '50%',
+                              width: 24,
+                              height: 24,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <X style={{ width: 14, height: 14 }} />
+                          </button>
+                        </div>
+                      ))}
+                      {form.images.length < 6 && (
+                        <div
+                          style={{
+                            border: '1px dashed #E8E6DF',
+                            borderRadius: 4,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            background: '#FAFAF8'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.multiple = true;
+                            input.accept = 'image/*';
+                            input.onchange = async (e) => {
+                              const files = Array.from(e.target.files);
+                              const previewUrls = files.map(file => URL.createObjectURL(file));
+                              const base64Images = await Promise.all(files.map(file => {
+                                return new Promise(resolve => {
+                                  const reader = new FileReader();
+                                  reader.onload = () => resolve(reader.result);
+                                  reader.readAsDataURL(file);
+                                });
+                              }));
+                              const newImages = [...form.images, ...base64Images];
+                              const newPreviews = [...imagePreviews, ...previewUrls];
+                              setForm({ ...form, images: newImages });
+                              setImagePreviews(newPreviews);
+                            };
+                            input.click();
+                          }}
+                        >
+                          <div style={{ fontSize: 24 }}>+</div>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#888780', marginTop: 8 }}>
+                      Click to add more images (max 6)
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: 20, marginBottom: 24 }}>

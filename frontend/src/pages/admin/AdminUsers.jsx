@@ -17,7 +17,9 @@ const AdminUsers = () => {
         const res = await fetch('/api/admin/users', { headers: { Authorization: `Bearer ${getToken()}` } });
         const data = await res.json();
         if (data.success) setUsers(data.users || []);
-      } catch (e) {}
+      } catch (e) {
+        setUsers([]);
+      }
       setLoading(false);
     };
     fetchUsers();
@@ -87,7 +89,7 @@ const AdminUsers = () => {
         {loading ? (
           <div style={{ padding: 40, textAlign: 'center', color: '#888780', fontSize: 15 }}>Loading customers...</div>
         ) : filtered.length === 0 ? (
-          <div style={{ padding: 40, textAlign: 'center', color: '#888780', fontSize: 15 }}>No customers found</div>
+          <div style={{ padding: 40, textAlign: 'center', color: '#888780', fontSize: 15 }}>No customers available. Users will appear here once they register.</div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>

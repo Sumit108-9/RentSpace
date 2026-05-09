@@ -1,13 +1,68 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Search, Heart, ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
+import { Search, Heart, ShoppingCart, Menu, X, User, LogOut, MapPin, ArrowRight } from 'lucide-react';
 import useStore from '../../store/useStore';
 import { ToastContext } from '../../App';
 
+const CITY_PINCODES = {
+  'Mumbai': ['400001', '400004', '400013', '400020', '400028', '400050', '400057', '400064', '400071', '400080'],
+  'Delhi': ['110001', '110002', '110003', '110004', '110005', '110006', '110007', '110008', '110009', '110010'],
+  'Bengaluru': ['560001', '560002', '560003', '560004', '560005', '560006', '560007', '560008', '560009', '560010'],
+  'Hyderabad': ['500001', '500002', '500003', '500004', '500005', '500006', '500007', '500008', '500009', '500010'],
+  'Chennai': ['600001', '600002', '600003', '600004', '600005', '600006', '600007', '600008', '600009', '600010'],
+  'Pune': ['411001', '411002', '411003', '411004', '411005', '411006', '411007', '411008', '411009', '411010'],
+  'Kolkata': ['700001', '700002', '700003', '700004', '700005', '700006', '700007', '700008', '700009', '700010'],
+  'Ahmedabad': ['380001', '380002', '380003', '380004', '380005', '380006', '380007', '380008', '380009', '380010']
+};
+
+const MAIN_CITIES = [
+  { name: 'Bengaluru', icon: '🏛️' },
+  { name: 'Mumbai', icon: '🏢' },
+  { name: 'Hyderabad', icon: '🕌' },
+  { name: 'Pune', icon: '🏰' },
+  { name: 'Delhi', icon: '🏛️' },
+  { name: 'Chennai', icon: '⛪' },
+  { name: 'Kolkata', icon: '🌉' },
+  { name: 'Ahmedabad', icon: '🏭' }
+];
+
 const Layout = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [locationModal, setLocationModal] = useState(false);
+  const [currentCity, setCurrentCity] = useState('Mumbai');
+  const [pincode, setPincode] = useState('');
+  const [savedPincode, setSavedPincode] = useState('400104');
   const navigate = useNavigate();
   const toast = useContext(ToastContext);
+
+  useEffect(() => {
+    const savedCity = localStorage.getItem('userCity');
+    const savedPin = localStorage.getItem('userPincode');
+    if (savedCity) setCurrentCity(savedCity);
+    if (savedPin) setSavedPincode(savedPin);
+  }, []);
+
+  const handleCitySelect = (city) => {
+    setCurrentCity(city);
+    localStorage.setItem('userCity', city);
+    // Auto-assign first pincode of the city
+    const defaultPin = CITY_PINCODES[city]?.[0] || '400001';
+    setSavedPincode(defaultPin);
+    localStorage.setItem('userPincode', defaultPin);
+    setLocationModal(false);
+    toast?.success(`Location changed to ${city} (${defaultPin})`);
+  };
+
+  const handlePincodeSubmit = () => {
+    if (pincode.length === 6 && /^\d{6}$/.test(pincode)) {
+      setSavedPincode(pincode);
+      localStorage.setItem('userPincode', pincode);
+      toast?.success(`Pincode ${pincode} saved`);
+      setPincode('');
+    } else {
+      toast?.error('Please enter a valid 6-digit pincode');
+    }
+  };
 
   // Reactive store reads
   const user = useStore((s) => s.user);
@@ -39,12 +94,12 @@ const Layout = () => {
           </Link>
 
           {/* Location Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: '#2C2C2A', cursor: 'pointer', padding: '8px 16px', borderRadius: 8, border: '1px solid #E8E6DF', background: '#FAFAF8' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" strokeWidth="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            <span>Mumbai</span>
+          <div 
+            onClick={() => setLocationModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: '#2C2C2A', cursor: 'pointer', padding: '8px 16px', borderRadius: 8, border: '1px solid #E8E6DF', background: '#FAFAF8' }}
+          >
+            <MapPin size={16} color="#1D9E75" />
+            <span>{currentCity}</span>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#888780" strokeWidth="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
@@ -55,7 +110,7 @@ const Layout = () => {
           <Link to="/" style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.15s' }}>Home</Link>
           <Link to="/products" style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.15s' }}>Furniture</Link>
           <Link to="/categories" style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.15s' }}>Categories</Link>
-          <Link to="/contact" style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.15s' }}>About Us</Link>
+          <Link to="/about" style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.15s' }}>About Us</Link>
         </div>
 
         <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
@@ -99,8 +154,111 @@ const Layout = () => {
         <Link to="/" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: '#2C2C2A' }}>Home</Link>
         <Link to="/products" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: '#2C2C2A' }}>Furniture</Link>
         <Link to="/categories" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: '#2C2C2A' }}>Categories</Link>
-        <Link to="/contact" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: '#2C2C2A' }}>About Us</Link>
+        <Link to="/about" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: '#2C2C2A' }}>About Us</Link>
       </div>}
+
+      {/* Location Modal */}
+      {locationModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 2000, padding: 20
+        }} onClick={() => setLocationModal(false)}>
+          <div style={{
+            background: '#fff', borderRadius: 16, padding: 40, maxWidth: 600, width: '100%',
+            maxHeight: '90vh', overflow: 'auto', position: 'relative'
+          }} onClick={e => e.stopPropagation()}>
+            {/* Close Button */}
+            <button 
+              onClick={() => setLocationModal(false)}
+              style={{ position: 'absolute', top: 20, right: 20, background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              <X size={24} color="#888780" />
+            </button>
+
+            {/* Title */}
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 600, textAlign: 'center', marginBottom: 8, color: '#2C2C2A' }}>
+              Select Delivery Location
+            </h2>
+
+            {/* Pincode Input */}
+            <div style={{ marginTop: 32, marginBottom: 16 }}>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  placeholder="Enter your pincode"
+                  value={pincode}
+                  onChange={(e) => setPincode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onKeyPress={(e) => e.key === 'Enter' && handlePincodeSubmit()}
+                  style={{
+                    width: '100%', height: 56, padding: '0 60px 0 24px', border: '2px solid #1D9E75',
+                    borderRadius: 28, fontSize: 16, fontFamily: "'DM Sans', sans-serif",
+                    outline: 'none', boxSizing: 'border-box'
+                  }}
+                />
+                <button 
+                  onClick={handlePincodeSubmit}
+                  style={{
+                    position: 'absolute', right: 8, width: 40, height: 40,
+                    background: '#1D9E75', border: 'none', borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <ArrowRight size={20} color="white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Current Pincode */}
+            <p style={{ textAlign: 'center', fontSize: 14, color: '#888780', marginBottom: 32 }}>
+              Currently selected pincode : <strong style={{ color: '#1D9E75' }}>{savedPincode}</strong>
+            </p>
+
+            {/* Divider with text */}
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
+              <div style={{ flex: 1, height: 1, background: '#E8E6DF' }}></div>
+              <span style={{ padding: '0 16px', fontSize: 14, color: '#888780' }}>Or select your city</span>
+              <div style={{ flex: 1, height: 1, background: '#E8E6DF' }}></div>
+            </div>
+
+            {/* Cities Grid with Pincodes */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+              {MAIN_CITIES.map(city => (
+                <div
+                  key={city.name}
+                  onClick={() => handleCitySelect(city.name)}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    padding: 16, borderRadius: 12, cursor: 'pointer',
+                    background: currentCity === city.name ? '#E1F5EE' : '#FAFAF8',
+                    border: currentCity === city.name ? '2px solid #1D9E75' : '2px solid transparent',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <div style={{
+                    width: 60, height: 60, borderRadius: 12, background: '#D4F5E9',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 28, marginBottom: 8
+                  }}>
+                    {city.icon}
+                  </div>
+                  <span style={{ fontSize: 13, fontWeight: currentCity === city.name ? 600 : 400, color: '#2C2C2A' }}>
+                    {city.name}
+                  </span>
+                  <span style={{ fontSize: 11, color: '#888780', marginTop: 4 }}>
+                    {CITY_PINCODES[city.name]?.[0]}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <p style={{ textAlign: 'center', fontSize: 12, color: '#888780' }}>
+              Click any city to auto-select its default pincode
+            </p>
+          </div>
+        </div>
+      )}
 
       <div style={{ flex: 1, minHeight: 0 }}>
         <Outlet />

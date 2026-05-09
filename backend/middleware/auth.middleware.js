@@ -16,9 +16,14 @@ export const protect = async (req, res, next) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
-      // Check if this is an admin token (has role but no id)
-      if (decoded.role === 'admin' && !decoded.id) {
-        req.user = { role: 'admin', email: decoded.email };
+      // Check if this is an admin token (has role: admin)
+      if (decoded.role === 'admin' && decoded.id) {
+        // Verify admin exists in database
+        const admin = await User.findById(decoded.id).select('-password');
+        if (!admin || admin.role !== 'admin') {
+          return res.status(401).json({ success: false, message: 'Admin not found or invalid role' });
+        }
+        req.user = admin;
         return next();
       }
       

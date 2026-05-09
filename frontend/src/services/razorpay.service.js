@@ -1,7 +1,7 @@
 import api from '../utils/api';
 
 const RAZORPAY_KEY_ID =
-  import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_SeqjX7UcUPZRwI';
+  import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_Sk28HdT74t9GDF';
 
 export const loadRazorpayScript = () => {
   return new Promise((resolve) => {

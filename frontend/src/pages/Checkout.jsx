@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../store/useStore';
 import { createRazorpayOrder, loadRazorpayScript } from '../services/razorpay.service';
@@ -22,6 +22,14 @@ const sx = {
 };
 
 const banks = ['SBI', 'HDFC', 'ICICI', 'Axis', 'Kotak', 'PNB', 'Bank of Baroda'];
+
+// Input component - defined outside to prevent re-mounting
+const Inp = ({ v, onC, pl, e, ty = 'text', id, name }) => (
+  <>
+    <input type={ty} id={id} name={name || id} value={v} onChange={onC} placeholder={pl} style={{ width: '100%', height: 48, padding: '0 14px', border: e ? '1px solid #e74c3c' : '1px solid #E8E6DF', borderRadius: 8, fontSize: 15 }} />
+    {e && <span style={{ fontSize: 12, color: '#e74c3c' }}>{e}</span>}
+  </>
+);
 
 const SkeletonCard = ({ mobile }) => (
   <div style={{ ...sx.card, opacity: 0.7 }}>
@@ -82,10 +90,10 @@ export default function Checkout() {
   };
 
   const sub = cart.reduce((sum, it) => {
-    const rp = it.rentPrice || it.product?.monthlyRent || 0;
+    const rp = it.product?.monthlyRent || it.product?.rentPrice || 0;
     const q = it.quantity || 1;
-    const du = rental.durationUnit === 'days' ? rental.duration / 30 : rental.duration;
-    return sum + (rp * q * du);
+    const months = rental.durationUnit === 'days' ? rental.duration / 30 : rental.duration;
+    return sum + (rp * q * Math.max(1, months));
   }, 0);
 
   const delivery = sub > 5000 ? 0 : 299;
@@ -98,6 +106,22 @@ export default function Checkout() {
   const vpc = c => /^[0-9]{6}$/.test(c);
   const vcn = n => /^[0-9]{16}$/.test(n.replace(/\s/g, ''));
   const vep = e => /^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(e);
+
+  // Optimized change handlers with useCallback for stable references
+  const handleCustChange = useCallback((field) => (e) => {
+    setCust(prev => ({ ...prev, [field]: e.target.value }));
+    if (err[field]) setErr(prev => ({ ...prev, [field]: '' }));
+  }, [err]);
+
+  const handleAddrChange = useCallback((field) => (e) => {
+    setAddr(prev => ({ ...prev, [field]: e.target.value }));
+    if (err[field]) setErr(prev => ({ ...prev, [field]: '' }));
+  }, [err]);
+
+  const handleCardChange = useCallback((field) => (e) => {
+    setCard(prev => ({ ...prev, [field]: e.target.value }));
+    if (err[field]) setErr(prev => ({ ...prev, [field]: '' }));
+  }, [err]);
   const vcv = c => /^[0-9]{3}$/.test(c);
   const vu = u => /^[a-zA-Z0-9._-]+@[a-zA-Z]+$/.test(u);
 
@@ -105,9 +129,7 @@ export default function Checkout() {
   const vAddr = () => addr.houseNo && addr.street && addr.city && addr.state && vpc(addr.pincode);
   const vPay = () => {
     if (pay === 'cod') return true;
-    if (pay === 'card') return vcn(card.n) && vep(card.e) && vcv(card.v) && card.name;
-    if (pay === 'upi') return vu(upi);
-    if (pay === 'netbanking') return bank.length > 0;
+    if (pay === 'razorpay') return true; // Razorpay handles validation
     return false;
   };
   const allV = () => vCust() && vAddr() && vPay() && terms;
@@ -133,11 +155,11 @@ export default function Checkout() {
         street: addr.street,
         city: addr.city,
         state: addr.state,
-        pincode: addr.pincode
+        zipCode: addr.pincode
       };
 
       const contactInfo = {
-        fullName: cust.fullName,
+        name: cust.fullName,
         phone: cust.phone,
         email: cust.email
       };
@@ -151,6 +173,7 @@ export default function Checkout() {
         deliveryInstructions: inst,
         couponCode: applied?.code,
         paymentMethod: payType,
+        paymentType: 'Full',
         paymentDetails: payRes,
         totalAmount: total,
         itemsTotal: sub,
@@ -164,11 +187,12 @@ export default function Checkout() {
         try { await sendOrderNotification(d.order._id, cust.fullName); } catch (e) { }
         nav(`/order-success/${d.order._id}`);
       } else {
-        alert(d.message || 'Failed');
+        alert(d.message || 'Failed to create order. Server returned: ' + JSON.stringify(d));
         setLoad(false);
       }
     } catch (e) {
-      alert('Error');
+      console.error('Order creation error:', e);
+      alert(e.response?.data?.message || e.message || 'Failed to create order. Please try again.');
       setLoad(false);
     }
   };
@@ -205,7 +229,7 @@ export default function Checkout() {
       });
 
       const rzp = new window.Razorpay({
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_SeqjX7UcUPZRwI',
+        key: import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_Sk28HdT74t9GDF',
         amount: od.amount,
         currency: od.currency,
         name: 'RentSpace',
@@ -227,18 +251,21 @@ export default function Checkout() {
 
       rzp.on('payment.failed', r => { alert(`Failed:${r.error.description}`); setLoad(false); });
       rzp.open();
-    } catch (e) { alert('Init failed'); setLoad(false); }
+    } catch (e) { 
+      console.error('Razorpay init error:', e);
+      alert('Payment initialization failed: ' + (e.message || e.response?.data?.message || 'Unknown error'));
+      setLoad(false); 
+    }
   };
 
-  useEffect(() => { if (cart.length === 0) nav('/cart'); }, [cart.length, nav]);
+  useEffect(() => { 
+    if (cart.length === 0) nav('/cart'); 
+    if (!user || !localStorage.getItem('token')) {
+      alert('Please login to place an order');
+      nav('/login');
+    }
+  }, [cart.length, nav, user]);
   if (cart.length === 0) return null;
-
-  const Inp = ({ v, onC, pl, e, ty = 'text' }) => (
-    <>
-      <input type={ty} value={v} onChange={onC} placeholder={pl} style={sx.ip(e)} />
-      {e && <span style={sx.err}>{e}</span>}
-    </>
-  );
 
   if (loading) {
     return (
@@ -265,20 +292,20 @@ export default function Checkout() {
           <div style={sx.card}>
             <h3 style={sx.h3}>Customer Details</h3>
             <div style={sx.r2(mobile)}>
-              <div><label style={sx.lb}>Full Name*</label><Inp v={cust.fullName} onC={e => setCust({ ...cust, fullName: e.target.value })} pl='Enter name' e={err.fullName} /></div>
-              <div><label style={sx.lb}>Phone*</label><Inp v={cust.phone} onC={e => setCust({ ...cust, phone: e.target.value })} pl='10-digit' e={err.phone} /></div>
-              <div style={{ gridColumn: '1/-1' }}><label style={sx.lb}>Email*</label><Inp v={cust.email} onC={e => setCust({ ...cust, email: e.target.value })} pl='email@example.com' e={err.email} /></div>
+              <div><label style={sx.lb}>Full Name*</label><Inp v={cust.fullName} onC={handleCustChange('fullName')} pl='Enter name' e={err.fullName} id='fullName' /></div>
+              <div><label style={sx.lb}>Phone*</label><Inp v={cust.phone} onC={handleCustChange('phone')} pl='10-digit' e={err.phone} id='phone' /></div>
+              <div style={{ gridColumn: '1/-1' }}><label style={sx.lb}>Email*</label><Inp v={cust.email} onC={handleCustChange('email')} pl='email@example.com' e={err.email} id='email' /></div>
             </div>
           </div>
 
           <div style={sx.card}>
             <h3 style={sx.h3}>Delivery Address</h3>
             <div style={sx.r2(mobile)}>
-              <div><label style={sx.lb}>House/Flat*</label><Inp v={addr.houseNo} onC={e => setAddr({ ...addr, houseNo: e.target.value })} pl='A-101' e={err.houseNo} /></div>
-              <div><label style={sx.lb}>PIN*</label><Inp v={addr.pincode} onC={e => setAddr({ ...addr, pincode: e.target.value })} pl='6-digit' e={err.pincode} /></div>
-              <div style={{ gridColumn: '1/-1' }}><label style={sx.lb}>Street*</label><Inp v={addr.street} onC={e => setAddr({ ...addr, street: e.target.value })} pl='Street name' e={err.street} /></div>
-              <div><label style={sx.lb}>City*</label><Inp v={addr.city} onC={e => setAddr({ ...addr, city: e.target.value })} pl='City' e={err.city} /></div>
-              <div><label style={sx.lb}>State*</label><Inp v={addr.state} onC={e => setAddr({ ...addr, state: e.target.value })} pl='State' e={err.state} /></div>
+              <div><label style={sx.lb}>House/Flat*</label><Inp v={addr.houseNo} onC={handleAddrChange('houseNo')} pl='A-101' e={err.houseNo} id='houseNo' /></div>
+              <div><label style={sx.lb}>PIN*</label><Inp v={addr.pincode} onC={handleAddrChange('pincode')} pl='6-digit' e={err.pincode} id='pincode' /></div>
+              <div style={{ gridColumn: '1/-1' }}><label style={sx.lb}>Street*</label><Inp v={addr.street} onC={handleAddrChange('street')} pl='Street name' e={err.street} id='street' /></div>
+              <div><label style={sx.lb}>City*</label><Inp v={addr.city} onC={handleAddrChange('city')} pl='City' e={err.city} id='city' /></div>
+              <div><label style={sx.lb}>State*</label><Inp v={addr.state} onC={handleAddrChange('state')} pl='State' e={err.state} id='state' /></div>
             </div>
           </div>
 
@@ -286,20 +313,15 @@ export default function Checkout() {
             <h3 style={sx.h3}>Rental Details</h3>
             <div style={sx.r3(mobile)}>
               <div><label style={sx.lb}>Start Date*</label><input type='date' value={rental.startDate} min={new Date().toISOString().split('T')[0]} onChange={e => setRental({ ...rental, startDate: e.target.value })} style={sx.ip(false)} /></div>
-              <div><label style={sx.lb}>Duration*</label><div style={{ display: 'flex', gap: 8 }}><input type='number' min='1' value={rental.duration} onChange={e => setRental({ ...rental, duration: parseInt(e.target.value) || 1 })} style={{ ...sx.ip(false), flex: 1 }} /><select value={rental.durationUnit} onChange={e => setRental({ ...rental, durationUnit: e.target.value })} style={{ ...sx.ip(false), background: '#fff' }}><option value='days'>Days</option><option value='months'>Months</option></select></div></div>
+              <div><label style={sx.lb}>Duration*</label><div style={{ display: 'flex', gap: 8 }}><input type='number' min='1' value={rental.duration} onChange={e => setRental({ ...rental, duration: parseInt(e.target.value) || 1 })} style={{ ...sx.ip(false), width: 80, flexShrink: 0 }} /><select value={rental.durationUnit} onChange={e => setRental({ ...rental, durationUnit: e.target.value })} style={{ ...sx.ip(false), flex: 1, background: '#fff' }}><option value='days'>Days</option><option value='months'>Months</option></select></div></div>
               <div><label style={sx.lb}>End Date</label><div style={{ ...sx.ip(false), display: 'flex', alignItems: 'center', background: '#f5f5f5' }}>{endDate()}</div></div>
             </div>
           </div>
 
           <div style={sx.card}>
             <h3 style={sx.h3}>Payment Method</h3>
-            <label style={sx.po(pay === 'cod')}><input type='radio' name='pay' value='cod' checked={pay === 'cod'} onChange={e => setPay(e.target.value)} style={{ width: 20, height: 20, accentColor: '#1D9E75' }} /><div><div style={{ fontSize: 16, fontWeight: 500 }}>Cash on Delivery</div><div style={{ fontSize: 13, color: '#888780' }}>Pay on delivery</div></div></label>
-            <label style={sx.po(pay === 'upi')}><input type='radio' name='pay' value='upi' checked={pay === 'upi'} onChange={e => setPay(e.target.value)} style={{ width: 20, height: 20, accentColor: '#1D9E75' }} /><div><div style={{ fontSize: 16, fontWeight: 500 }}>UPI</div><div style={{ fontSize: 13, color: '#888780' }}>Google Pay, PhonePe</div></div></label>
-            {pay === 'upi' && <div style={{ padding: '0 0 16px 48px' }}><label style={sx.lb}>UPI ID*</label><input type='text' value={upi} onChange={e => setUpi(e.target.value)} placeholder='name@upi' style={{ ...sx.ip(err.pay), maxWidth: 300 }} /></div>}
-            <label style={sx.po(pay === 'card')}><input type='radio' name='pay' value='card' checked={pay === 'card'} onChange={e => setPay(e.target.value)} style={{ width: 20, height: 20, accentColor: '#1D9E75' }} /><div><div style={{ fontSize: 16, fontWeight: 500 }}>Card</div><div style={{ fontSize: 13, color: '#888780' }}>Credit/Debit</div></div></label>
-            {pay === 'card' && <div style={{ padding: '0 0 16px 48px' }}><div style={sx.r2(mobile)}><div style={{ gridColumn: '1/-1' }}><label style={sx.lb}>Card Number*</label><input type='text' value={card.n} onChange={e => setCard({ ...card, n: e.target.value.replace(/\D/g, '').slice(0, 16) })} placeholder='1234567890123456' style={sx.ip(err.pay)} /></div><div><label style={sx.lb}>Name*</label><input type='text' value={card.name} onChange={e => setCard({ ...card, name: e.target.value })} placeholder='Name on card' style={sx.ip(false)} /></div><div><label style={sx.lb}>Expiry*</label><input type='text' value={card.e} onChange={e => { let v = e.target.value.replace(/\D/g, ''); if (v.length >= 2) v = v.slice(0, 2) + '/' + v.slice(2, 4); setCard({ ...card, e: v }); }} placeholder='MM/YY' style={sx.ip(false)} /></div><div><label style={sx.lb}>CVV*</label><input type='password' maxLength={3} value={card.v} onChange={e => setCard({ ...card, v: e.target.value.replace(/\D/g, '').slice(0, 3) })} placeholder='123' style={sx.ip(false)} /></div></div></div>}
-            <label style={sx.po(pay === 'netbanking')}><input type='radio' name='pay' value='netbanking' checked={pay === 'netbanking'} onChange={e => setPay(e.target.value)} style={{ width: 20, height: 20, accentColor: '#1D9E75' }} /><div><div style={{ fontSize: 16, fontWeight: 500 }}>Net Banking</div><div style={{ fontSize: 13, color: '#888780' }}>All major banks</div></div></label>
-            {pay === 'netbanking' && <div style={{ padding: '0 0 16px 48px' }}><label style={sx.lb}>Select Bank*</label><select value={bank} onChange={e => setBank(e.target.value)} style={{ ...sx.ip(err.pay), maxWidth: 300, background: '#fff' }}><option value=''>--Select--</option>{banks.map(b => <option key={b} value={b}>{b}</option>)}</select></div>}
+            <label style={sx.po(pay === 'cod')}><input type='radio' name='pay' value='cod' checked={pay === 'cod'} onChange={e => setPay(e.target.value)} style={{ width: 20, height: 20, accentColor: '#1D9E75' }} /><div><div style={{ fontSize: 16, fontWeight: 500 }}>Cash on Delivery (COD)</div><div style={{ fontSize: 13, color: '#888780' }}>Pay when you receive your furniture</div></div></label>
+            <label style={sx.po(pay === 'razorpay')}><input type='radio' name='pay' value='razorpay' checked={pay === 'razorpay'} onChange={e => setPay(e.target.value)} style={{ width: 20, height: 20, accentColor: '#1D9E75' }} /><div><div style={{ fontSize: 16, fontWeight: 500 }}>Online Payment</div><div style={{ fontSize: 13, color: '#888780' }}>Pay via Razorpay (Card, UPI, Net Banking, Wallet)</div></div></label>
           </div>
 
           <div style={sx.card}>
@@ -319,8 +341,8 @@ export default function Checkout() {
                 const q = it.quantity || 1;
                 return (
                   <div key={idx} style={{ display: 'flex', gap: 12, marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid #f0f0f0' }}>
-                    <img src={p.image?.[0] || '/placeholder.jpg'} alt={p.name} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 6 }} />
-                    <div style={{ flex: 1 }}><div style={{ fontWeight: 500, fontSize: 14 }}>{p.name}</div><div style={{ fontSize: 12, color: '#888780' }}>Qty:{q}×₹{rp}</div></div>
+                    <img src={p.images?.[0] || p.image?.[0] || '/placeholder.jpg'} alt={p.name} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 6 }} onError={(e) => { e.target.style.display = 'none'; }} />
+                    <div style={{ flex: 1 }}><div style={{ fontWeight: 500, fontSize: 14 }}>{p.name}</div><div style={{ fontSize: 12, color: '#888780' }}>Qty: {q} × ₹{rp}/mo</div></div>
                     <div style={{ fontWeight: 600 }}>₹{(rp * q).toLocaleString()}</div>
                   </div>
                 );
@@ -335,7 +357,7 @@ export default function Checkout() {
             {err.promo && <div style={{ ...sx.err, marginBottom: 12 }}>{err.promo}</div>}{applied && <div style={{ background: '#e8f5e9', padding: 10, borderRadius: 6, marginBottom: 16, fontSize: 13, color: '#1D9E75' }}>✓ {applied.code} applied!</div>}
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 16 }}><input type='checkbox' checked={terms} onChange={e => setTerms(e.target.checked)} style={{ width: 18, height: 18, accentColor: '#1D9E75', marginTop: 2 }} /><span style={{ fontSize: 13, color: '#555' }}>I agree to the <a href='/terms' target='_blank' style={{ color: '#1D9E75' }}>Terms & Conditions</a> and <a href='/privacy' target='_blank' style={{ color: '#1D9E75' }}>Privacy Policy</a>*</span></div>
             {err.terms && <div style={{ ...sx.err, marginBottom: 12 }}>{err.terms}</div>}
-            <button onClick={placeOrder} disabled={!allV() || load} style={sx.btn(!allV() || load)}>{load ? 'Processing...' : 'Pay Now'}</button>
+            <button onClick={placeOrder} disabled={!allV() || load} style={sx.btn(!allV() || load)}>{load ? 'Processing...' : pay === 'cod' ? 'Place Order (COD)' : 'Pay Online'}</button>
           </div>
         </div>
       </div>

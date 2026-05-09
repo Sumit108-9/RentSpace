@@ -1,12 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../utils/api';
 
 const Categories = () => {
+  const [categoryCounts, setCategoryCounts] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategoryCounts = async () => {
+      try {
+        const response = await api.get('/products/categories/counts');
+        const data = response.data;
+        if (data.success && data.categories) {
+          const counts = {};
+          data.categories.forEach(cat => {
+            counts[cat.category] = cat.count;
+          });
+          setCategoryCounts(counts);
+        }
+      } catch (err) {
+        console.error('Failed to fetch category counts:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategoryCounts();
+  }, []);
+
   const categories = [
     {
       name: 'Sofas',
       slug: 'sofa',
-      count: '32',
       description: 'Comfortable seating for your living room',
       image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600',
       color: '#E1F5EE'
@@ -14,7 +39,6 @@ const Categories = () => {
     {
       name: 'Beds',
       slug: 'bed',
-      count: '28',
       description: 'Quality beds for restful sleep',
       image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600',
       color: '#F5E6E1'
@@ -22,7 +46,6 @@ const Categories = () => {
     {
       name: 'Tables',
       slug: 'table',
-      count: '24',
       description: 'Dining, coffee & study tables',
       image: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=600',
       color: '#E8F0E8'
@@ -30,7 +53,6 @@ const Categories = () => {
     {
       name: 'Chairs',
       slug: 'chair',
-      count: '18',
       description: 'Accent, dining & office chairs',
       image: 'https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600',
       color: '#F0E8E8'
@@ -38,7 +60,6 @@ const Categories = () => {
     {
       name: 'Storage',
       slug: 'wardrobe',
-      count: '16',
       description: 'Wardrobes, bookshelves & cabinets',
       image: 'https://images.unsplash.com/photo-1594620302200-9a762244a156?w=600',
       color: '#E8E8F0'
@@ -46,7 +67,6 @@ const Categories = () => {
     {
       name: 'Dining',
       slug: 'dining',
-      count: '14',
       description: 'Complete dining sets & furniture',
       image: 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=600',
       color: '#F5F0E1'
@@ -134,7 +154,7 @@ const Categories = () => {
                   fontWeight: 500,
                   color: '#2C2C2A'
                 }}>
-                  {cat.count} items
+                  {loading ? '...' : (categoryCounts[cat.slug] || 0)} items
                 </div>
               </div>
 

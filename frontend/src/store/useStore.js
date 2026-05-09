@@ -273,39 +273,31 @@ const useStore = create(
 
           const cacheKey = `/api/products?${params}`;
           
-          // Check cache first
-          const cached = localStorage.getItem(`rentspace_cache_${cacheKey}`);
-          if (cached) {
-            const { data, timestamp } = JSON.parse(cached);
-            if (Date.now() - timestamp < 5 * 60 * 1000) { // 5 min cache
-              set({
-                products: data.products,
-                productPagination: data.pagination,
-                productsLoading: false
-              });
-              return;
-            }
-          }
-
+          // Clear cache to ensure fresh data
+          localStorage.removeItem(`rentspace_cache_${cacheKey}`);
+          
+          console.log('Fetching products with params:', params.toString());
           const response = await api.get(`/products?${params}`);
           const data = response.data;
-
+          console.log('Products API response:', { success: data.success, count: data.products?.length, total: data.pagination?.total });
+          
           if (data.success) {
             // Cache the response
             localStorage.setItem(`rentspace_cache_${cacheKey}`, JSON.stringify({
               data: { products: data.products, pagination: data.pagination },
               timestamp: Date.now()
             }));
-            
             set({
-              products: data.products,
-              productPagination: data.pagination,
+              products: data.products || [],
+              productPagination: data.pagination || { page: 1, limit, total: 0, pages: 0, hasMore: false },
               productsLoading: false
             });
           } else {
+            console.error('Products API error:', data.message);
             set({ productError: data.message || 'Failed to fetch products', productsLoading: false });
           }
         } catch (error) {
+          console.error('Failed to fetch products:', error);
           set({ productError: error.message, productsLoading: false });
         }
       },
@@ -369,8 +361,61 @@ const useStore = create(
 
       clearSelectedProduct: () => set({ selectedProduct: null, productError: null }),
 
-      // Orders State - NOT persisted, always fetch from API
-      // No local orders storage - each user gets fresh data from server
+      // Admin Orders State - Shared between AdminDashboard and AdminOrders
+      adminOrders: [],
+      adminOrdersLoading: false,
+      adminOrdersError: null,
+      adminOrdersLastFetch: null,
+
+      fetchAdminOrders: async (forceRefresh = false) => {
+        const { adminOrdersLastFetch } = get();
+        const CACHE_DURATION = 30 * 1000; // 30 seconds cache
+
+        // Use cache if not forcing refresh and cache is fresh
+        if (!forceRefresh && adminOrdersLastFetch && (Date.now() - adminOrdersLastFetch < CACHE_DURATION)) {
+          return;
+        }
+
+        set({ adminOrdersLoading: true, adminOrdersError: null });
+        try {
+          const token = get().token || localStorage.getItem('token');
+          const res = await fetch('/api/admin/orders', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if (data.success) {
+            set({ adminOrders: data.orders || [], adminOrdersLastFetch: Date.now() });
+          } else {
+            set({ adminOrdersError: data.message || 'Failed to fetch orders' });
+          }
+        } catch (error) {
+          console.error('Failed to fetch admin orders:', error);
+          set({ adminOrdersError: error.message });
+        } finally {
+          set({ adminOrdersLoading: false });
+        }
+      },
+
+      updateAdminOrderStatus: async (orderId, newStatus) => {
+        try {
+          const token = get().token || localStorage.getItem('token');
+          const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ status: newStatus })
+          });
+          const data = await res.json();
+          if (data.success) {
+            // Refresh orders after status update
+            get().fetchAdminOrders(true);
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.error('Failed to update order status:', error);
+          return false;
+        }
+      },
     }),
     {
       name: 'rentspace-storage',

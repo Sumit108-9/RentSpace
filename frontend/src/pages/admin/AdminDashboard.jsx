@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
-
-const DEFAULT_STATS = { totalOrders: 0, totalRevenue: 0, activeRentals: 0, totalCustomers: 0, totalProducts: 0 };
-
-const DEFAULT_REVENUE = [
-  { month: 'Jan', revenue: 0 }, { month: 'Feb', revenue: 0 },
-  { month: 'Mar', revenue: 0 }, { month: 'Apr', revenue: 0 },
-  { month: 'May', revenue: 0 }, { month: 'Jun', revenue: 0 },
-  { month: 'Jul', revenue: 0 }, { month: 'Aug', revenue: 0 },
-  { month: 'Sep', revenue: 0 }, { month: 'Oct', revenue: 0 },
-  { month: 'Nov', revenue: 0 }, { month: 'Dec', revenue: 0 },
-];
+import useStore from '../../store/useStore';
 
 const STATUS_STYLES = {
   pending:   { bg: '#FEF3C7', fg: '#92400E' },
@@ -24,11 +14,10 @@ const STATUS_STYLES = {
 };
 
 const AdminDashboard = () => {
-
+  const { adminOrders, adminOrdersLoading, fetchAdminOrders } = useStore();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState(DEFAULT_STATS);
-  const [revenueByMonth, setRevenueByMonth] = useState(DEFAULT_REVENUE);
-  const [recentOrders, setRecentOrders] = useState([]);
+  const [stats, setStats] = useState({ totalOrders: 0, totalRevenue: 0, activeRentals: 0, totalCustomers: 0, totalProducts: 0 });
+  const [revenueByMonth, setRevenueByMonth] = useState([]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -40,24 +29,33 @@ const AdminDashboard = () => {
         });
         const data = await res.json();
         if (res.ok && data.success) {
-          setStats(data.stats || DEFAULT_STATS);
-          setRevenueByMonth(data.revenueByMonth?.length ? data.revenueByMonth : DEFAULT_REVENUE);
-          setRecentOrders(data.recentOrders || []);
+          setStats(data.stats || { totalOrders: 0, totalRevenue: 0, activeRentals: 0, totalCustomers: 0, totalProducts: 0 });
+          setRevenueByMonth(data.revenueByMonth || []);
+        } else {
+          setStats({ totalOrders: 0, totalRevenue: 0, activeRentals: 0, totalCustomers: 0, totalProducts: 0 });
+          setRevenueByMonth([]);
         }
       } catch (err) {
         console.error('Failed to load dashboard stats:', err);
+        setStats({ totalOrders: 0, totalRevenue: 0, activeRentals: 0, totalCustomers: 0, totalProducts: 0 });
+        setRevenueByMonth([]);
       } finally {
         setLoading(false);
       }
     };
     loadDashboardData();
-  }, []);
+    // Fetch shared admin orders
+    fetchAdminOrders();
+  }, [fetchAdminOrders]);
+
+  // Get recent orders from shared store (first 7)
+  const recentOrders = adminOrders.slice(0, 7);
 
   const statCards = [
-    { label: 'Total Orders',    value: stats.totalOrders,    growth: '12.5%' },
-    { label: 'Total Revenue',   value: `₹${(stats.totalRevenue || 0).toLocaleString('en-IN')}`, growth: '18.2%' },
-    { label: 'Active Rentals',  value: stats.activeRentals,  growth: '9.4%' },
-    { label: 'Total Customers', value: stats.totalCustomers, growth: '14.7%' },
+    { label: 'Total Orders',    value: stats.totalOrders },
+    { label: 'Total Revenue',   value: `₹${(stats.totalRevenue || 0).toLocaleString('en-IN')}` },
+    { label: 'Active Rentals',  value: stats.activeRentals },
+    { label: 'Total Customers', value: stats.totalCustomers },
   ];
 
   return (
@@ -75,7 +73,6 @@ const AdminDashboard = () => {
               <div key={idx} style={{ background: '#fff', borderRadius: 12, border: '0.5px solid #E8E6DF', padding: '10px 18px' }}>
                 <div style={{ fontSize: 15, color: '#888780', marginBottom: 8 }}>{s.label}</div>
                 <div style={{ fontSize: 28, fontWeight: 700, color: '#2C2C2A', marginBottom: 6 }}>{loading ? '—' : (typeof s.value === 'number' ? s.value.toLocaleString('en-IN') : s.value)}</div>
-                <div style={{ fontSize: 15, color: '#1D9E75', fontWeight: 500 }}>↑ {s.growth}</div>
               </div>
             ))}
           </div>
@@ -98,23 +95,31 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {recentOrders.map((o) => {
-                    const sc = STATUS_STYLES[o.orderStatus] || STATUS_STYLES.pending;
-                    const label = o.orderStatus === 'confirmed' ? 'Active' : o.orderStatus.charAt(0).toUpperCase() + o.orderStatus.slice(1);
-                    return (
-                      <tr key={o._id} style={{ borderBottom: '0.5px solid #F5F4F0' }}>
-                        <td style={{ padding: '12px 12px', fontSize: 15, color: '#1D9E75', fontWeight: 500 }}>#{o.orderNumber || o._id?.slice(-6)}</td>
-                        <td style={{ padding: '12px 12px', fontSize: 15, color: '#2C2C2A' }}>{o.user?.name || 'Guest'}</td>
-                        <td style={{ padding: '12px 12px', fontSize: 15, color: '#2C2C2A', fontWeight: 500 }}>₹{(o.totalAmount || 0).toLocaleString('en-IN')}</td>
-                        <td style={{ padding: '12px 12px' }}>
-                          <span style={{ background: sc.bg, color: sc.fg, padding: '4px 14px', borderRadius: 20, fontSize: 15, fontWeight: 500 }}>{label}</span>
-                        </td>
-                        <td style={{ padding: '12px 12px', fontSize: 15, color: '#888780' }}>
-                          {new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {recentOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: '#888780', fontSize: 15 }}>
+                        No orders found. Orders will appear here once customers place them.
+                      </td>
+                    </tr>
+                  ) : (
+                    recentOrders.map((o) => {
+                      const sc = STATUS_STYLES[o.orderStatus] || STATUS_STYLES.pending;
+                      const label = o.orderStatus === 'confirmed' ? 'Active' : o.orderStatus.charAt(0).toUpperCase() + o.orderStatus.slice(1);
+                      return (
+                        <tr key={o._id} style={{ borderBottom: '0.5px solid #F5F4F0' }}>
+                          <td style={{ padding: '12px 12px', fontSize: 15, color: '#1D9E75', fontWeight: 500 }}>#{o.orderNumber || o._id?.slice(-6)}</td>
+                          <td style={{ padding: '12px 12px', fontSize: 15, color: '#2C2C2A' }}>{o.user?.name || 'Guest'}</td>
+                          <td style={{ padding: '12px 12px', fontSize: 15, color: '#2C2C2A', fontWeight: 500 }}>₹{(o.totalAmount || 0).toLocaleString('en-IN')}</td>
+                          <td style={{ padding: '12px 12px' }}>
+                            <span style={{ background: sc.bg, color: sc.fg, padding: '4px 14px', borderRadius: 20, fontSize: 15, fontWeight: 500 }}>{label}</span>
+                          </td>
+                          <td style={{ padding: '12px 12px', fontSize: 15, color: '#888780' }}>
+                            {new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -126,16 +131,22 @@ const AdminDashboard = () => {
                 <span style={{ fontSize: 15, color: '#888780' }}>This Month</span>
               </div>
               <div style={{ width: '100%', height: 260 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={revenueByMonth} margin={{ top: 4, right: 4, left: -30, bottom: 0 }}>
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#888780', fontSize: 10 }} />
-                    <Tooltip
-                      formatter={(v) => [`₹${Number(v).toLocaleString('en-IN')}`, 'Revenue']}
-                      contentStyle={{ background: '#fff', border: '0.5px solid #E8E6DF', borderRadius: 8, fontSize: 11 }}
-                    />
-                    <Bar dataKey="revenue" fill="#1D9E75" radius={[3, 3, 0, 0]} maxBarSize={16} />
-                  </BarChart>
-                </ResponsiveContainer>
+                {revenueByMonth.length === 0 ? (
+                  <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888780', fontSize: 14 }}>
+                    No revenue data available yet.
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={revenueByMonth} margin={{ top: 4, right: 4, left: -30, bottom: 0 }}>
+                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#888780', fontSize: 10 }} />
+                      <Tooltip
+                        formatter={(v) => [`₹${Number(v).toLocaleString('en-IN')}`, 'Revenue']}
+                        contentStyle={{ background: '#fff', border: '0.5px solid #E8E6DF', borderRadius: 8, fontSize: 11 }}
+                      />
+                      <Bar dataKey="revenue" fill="#1D9E75" radius={[3, 3, 0, 0]} maxBarSize={16} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
           </div>

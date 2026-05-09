@@ -1,14 +1,11 @@
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import Product from '../models/product.model.js';
 import Order from '../models/order.model.js';
 import User from '../models/user.model.js';
 
-// Hardcoded admin credentials
-const ADMIN_EMAIL = 'sumitdevv416@gmail.com';
-const ADMIN_PASSWORD = 'Sumitdev108';
-
 /**
- * @desc    Admin login
+ * @desc    Admin login - Verify from MongoDB
  * @route   POST /api/admin/login
  * @access  Public
  */
@@ -24,8 +21,20 @@ export const adminLogin = async (req, res) => {
       });
     }
 
-    // Check credentials against hardcoded values
-    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    // Find admin user in MongoDB
+    const admin = await User.findOne({ email, role: 'admin' }).select('+password');
+    
+    if (!admin) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Verify password using bcrypt
+    const isMatch = await bcrypt.compare(password, admin.password);
+    
+    if (!isMatch) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -34,20 +43,21 @@ export const adminLogin = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { email: ADMIN_EMAIL, role: 'admin' },
+      { id: admin._id, email: admin.email, role: 'admin' },
       process.env.JWT_SECRET || 'fallbacksecret',
       { expiresIn: '1d' }
     );
 
-    // Return token and admin data (flat shape, matches /api/auth/login)
+    // Return token and admin data
     res.status(200).json({
       success: true,
       message: 'Admin login successful',
       token,
       user: {
-        email: ADMIN_EMAIL,
+        id: admin._id,
+        email: admin.email,
         role: 'admin',
-        name: 'Administrator'
+        name: admin.name
       }
     });
 
@@ -92,7 +102,20 @@ export const getAllProducts = async (req, res) => {
  */
 export const createProduct = async (req, res) => {
   try {
-    const { name, description, monthlyRent, images, category, countInStock, isFeatured, isActive } = req.body;
+    const { name, description, monthlyRent, securityDeposit, images, category, countInStock, isFeatured, isActive } = req.body;
+
+    console.log('Create product request body:', {
+      name,
+      description: description ? 'present' : 'missing',
+      monthlyRent,
+      securityDeposit,
+      images: images ? `${images.length} images` : 'none',
+      category,
+      countInStock,
+      isFeatured,
+      isActive,
+      imageTypes: images ? images.map(img => typeof img === 'string' ? 'string' : typeof img) : 'none'
+    });
 
     if (!name || !monthlyRent || !category) {
       return res.status(400).json({
@@ -101,11 +124,15 @@ export const createProduct = async (req, res) => {
       });
     }
 
+    // Handle images - ensure they're strings
+    const processedImages = Array.isArray(images) ? images : [];
+    
     const product = await Product.create({
       name,
-      description: description || 'No description',
+      description: description || 'No description provided',
       monthlyRent,
-      images: images || [],
+      securityDeposit: securityDeposit || 0,
+      images: processedImages,
       category,
       countInStock: countInStock ?? 10,
       isFeatured: isFeatured || false,
@@ -119,6 +146,7 @@ export const createProduct = async (req, res) => {
     });
   } catch (error) {
     console.error('Create Product Error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
       message: 'Failed to create product',
@@ -210,6 +238,7 @@ export const getStats = async (req, res) => {
       totalOrders,
       activeRentals,
       totalCustomers,
+      totalAdmins,
       totalProducts,
       revenueAgg,
       revenueByMonthAgg,
@@ -219,6 +248,7 @@ export const getStats = async (req, res) => {
       Order.countDocuments({}),
       Order.countDocuments({ orderStatus: { $in: ['confirmed', 'shipped', 'delivered'] } }),
       User.countDocuments({ role: 'user' }),
+      User.countDocuments({ role: 'admin' }),
       Product.countDocuments({ isActive: true }),
       Order.aggregate([
         { $match: { isPaid: true } },
@@ -281,6 +311,7 @@ export const getStats = async (req, res) => {
         totalRevenue,
         activeRentals,
         totalCustomers,
+        totalAdmins,
         totalProducts,
       },
       revenueByMonth,

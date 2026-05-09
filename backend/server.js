@@ -28,6 +28,15 @@ const logger = createLogger();
 // 🔐 SECURITY
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-eval'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://rentspace-backend-ch9s.onrender.com", "http://localhost:5000"],
+    },
+  },
 }));
 
 
@@ -61,8 +70,8 @@ app.use(cors({
 
 
 // 📦 BODY PARSER
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 
 // 📊 LOGGING
@@ -119,18 +128,24 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-
 // START SERVER
 const startServer = async () => {
   try {
+    // Connect to database
     await connectDB();
 
+    // Start HTTP server
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(` Server running on port ${PORT}`);
+      console.log(`🚀 Server running on port ${PORT} ✅`);
+      
+      // Log email status
+      if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        console.log(`📧 Email service ready ✅`);
+      }
     });
 
   } catch (error) {
-    console.error(' Server failed:', error.message);
+    console.error('❌ Server failed to start:', error.message);
     process.exit(1);
   }
 };

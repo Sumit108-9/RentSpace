@@ -35,7 +35,9 @@ const AdminOrders = lazy(() => import('./pages/admin/AdminOrders'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
+const OrderDetails = lazy(() => import('./pages/OrderDetails'));
 const Contact = lazy(() => import('./pages/Contact'));
+const About = lazy(() => import('./pages/About'));
 const Categories = lazy(() => import('./pages/Categories'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
@@ -115,6 +117,7 @@ function App() {
           <Route element={<ProtectedRoute><UserPortalLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/orders/:id" element={<OrderDetails />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/wishlist" element={<Wishlist />} />
           </Route>
@@ -144,6 +147,7 @@ function App() {
             <Route path="reset-password" element={<ResetPassword />} />
             <Route path="customize" element={<Customize />} />
             <Route path="contact" element={<Contact />} />
+            <Route path="about" element={<About />} />
             <Route path="order-success/:orderId" element={<OrderSuccess />} />
             <Route path="payment/success" element={<OrderSuccess />} />
             <Route path="*" element={<NotFound />} />
