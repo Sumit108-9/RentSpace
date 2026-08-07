@@ -23,7 +23,7 @@ const AdminLayout = () => {
   const initials = user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'AD';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', fontFamily: 'DM Sans, sans-serif' }}>
+    <div className="admin-layout" style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', fontFamily: 'DM Sans, sans-serif' }}>
 
       {/* ── Top dark header ── */}
       <header style={{ height: 100, background: '#063831', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 38px', flexShrink: 0, zIndex: 100, borderBottom: '1px solid #1a4a3d' }}>

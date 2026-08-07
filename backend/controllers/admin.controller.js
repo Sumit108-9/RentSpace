@@ -1,11 +1,12 @@
-import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import User from '../models/user.model.js';
 import Product from '../models/product.model.js';
 import Order from '../models/order.model.js';
-import User from '../models/user.model.js';
 
 /**
- * @desc    Admin login - Verify from MongoDB
+ * @desc    Admin login
  * @route   POST /api/admin/login
  * @access  Public
  */
@@ -13,7 +14,6 @@ export const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -21,9 +21,8 @@ export const adminLogin = async (req, res) => {
       });
     }
 
-    // Find admin user in MongoDB
     const admin = await User.findOne({ email, role: 'admin' }).select('+password');
-    
+
     if (!admin) {
       return res.status(401).json({
         success: false,
@@ -31,9 +30,8 @@ export const adminLogin = async (req, res) => {
       });
     }
 
-    // Verify password using bcrypt
     const isMatch = await bcrypt.compare(password, admin.password);
-    
+
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -41,14 +39,12 @@ export const adminLogin = async (req, res) => {
       });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: admin._id, email: admin.email, role: 'admin' },
       process.env.JWT_SECRET || 'fallbacksecret',
       { expiresIn: '1d' }
     );
 
-    // Return token and admin data
     res.status(200).json({
       success: true,
       message: 'Admin login successful',
@@ -60,7 +56,6 @@ export const adminLogin = async (req, res) => {
         name: admin.name
       }
     });
-
   } catch (error) {
     console.error('Admin Login Error:', error);
     res.status(500).json({
@@ -79,7 +74,6 @@ export const adminLogin = async (req, res) => {
 export const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({}).sort({ createdAt: -1 });
-    
     res.status(200).json({
       success: true,
       count: products.length,
@@ -104,19 +98,6 @@ export const createProduct = async (req, res) => {
   try {
     const { name, description, monthlyRent, securityDeposit, images, category, countInStock, isFeatured, isActive } = req.body;
 
-    console.log('Create product request body:', {
-      name,
-      description: description ? 'present' : 'missing',
-      monthlyRent,
-      securityDeposit,
-      images: images ? `${images.length} images` : 'none',
-      category,
-      countInStock,
-      isFeatured,
-      isActive,
-      imageTypes: images ? images.map(img => typeof img === 'string' ? 'string' : typeof img) : 'none'
-    });
-
     if (!name || !monthlyRent || !category) {
       return res.status(400).json({
         success: false,
@@ -124,9 +105,8 @@ export const createProduct = async (req, res) => {
       });
     }
 
-    // Handle images - ensure they're strings
     const processedImages = Array.isArray(images) ? images : [];
-    
+
     const product = await Product.create({
       name,
       description: description || 'No description provided',
@@ -146,7 +126,6 @@ export const createProduct = async (req, res) => {
     });
   } catch (error) {
     console.error('Create Product Error:', error);
-    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
       message: 'Failed to create product',
@@ -167,17 +146,10 @@ export const updateProduct = async (req, res) => {
     const allowed = ['name', 'description', 'monthlyRent', 'images', 'category', 'countInStock', 'isFeatured', 'isActive'];
     allowed.forEach(key => { if (req.body[key] !== undefined) updates[key] = req.body[key]; });
 
-    const product = await Product.findByIdAndUpdate(
-      id,
-      updates,
-      { new: true, runValidators: true }
-    );
+    const product = await Product.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
 
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: 'Product not found'
-      });
+      return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
     res.status(200).json({
@@ -203,20 +175,13 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-
     const product = await Product.findByIdAndDelete(id);
 
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: 'Product not found'
-      });
+      return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
-    res.status(200).json({
-      success: true,
-      message: 'Product deleted successfully'
-    });
+    res.status(200).json({ success: true, message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Delete Product Error:', error);
     res.status(500).json({
@@ -228,95 +193,111 @@ export const deleteProduct = async (req, res) => {
 };
 
 /**
- * @desc   Aggregated admin stats for the dashboard
+ * @desc   Aggregated admin stats for dashboard with COD-aware logic
  * @route  GET /api/admin/stats
  * @access Private/Admin
  */
 export const getStats = async (req, res) => {
   try {
-    const [
-      totalOrders,
-      activeRentals,
-      totalCustomers,
-      totalAdmins,
-      totalProducts,
-      revenueAgg,
-      revenueByMonthAgg,
-      topProductsAgg,
-      recentOrders,
-    ] = await Promise.all([
-      Order.countDocuments({}),
-      Order.countDocuments({ orderStatus: { $in: ['confirmed', 'shipped', 'delivered'] } }),
-      User.countDocuments({ role: 'user' }),
-      User.countDocuments({ role: 'admin' }),
-      Product.countDocuments({ isActive: true }),
-      Order.aggregate([
-        { $match: { isPaid: true } },
-        { $group: { _id: null, total: { $sum: '$totalAmount' } } },
-      ]),
-      Order.aggregate([
-        { $match: { isPaid: true } },
-        {
-          $group: {
-            _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
-            revenue: { $sum: '$totalAmount' },
-            orders: { $sum: 1 },
-          },
-        },
-        { $sort: { _id: 1 } },
-        { $limit: 12 },
-      ]),
-      Order.aggregate([
-        { $unwind: '$orderItems' },
-        {
-          $group: {
-            _id: '$orderItems.product',
-            name: { $first: '$orderItems.name' },
-            image: { $first: '$orderItems.image' },
-            orderCount: { $sum: '$orderItems.quantity' },
-            revenue: {
-              $sum: {
-                $multiply: [
-                  '$orderItems.monthlyRent',
-                  '$orderItems.rentalDuration',
-                  '$orderItems.quantity',
-                ],
-              },
-            },
-          },
-        },
-        { $sort: { orderCount: -1 } },
-        { $limit: 5 },
-      ]),
-      Order.find({})
-        .sort({ createdAt: -1 })
-        .limit(8)
-        .populate('user', 'name email')
-        .select('orderNumber totalAmount orderStatus paymentStatus createdAt user orderItems'),
-    ]);
+    const allOrders = await Order.find({}).lean();
+    const totalCustomers = await User.countDocuments({ role: 'user' });
+    const totalAdmins = await User.countDocuments({ role: 'admin' });
+    const totalProducts = await Product.countDocuments({ isActive: true });
+    const recentOrders = await Order.find({})
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .populate('user', 'name email')
+      .select('orderNumber totalAmount orderStatus paymentStatus paymentMethod createdAt user orderItems');
 
-    const totalRevenue = revenueAgg[0]?.total || 0;
+    // Helpers - normalize values, read from both top-level and paymentInfo
+    const getMethod = (o) => String(o.paymentMethod || o.paymentInfo?.method || '').toLowerCase();
+    const getPayStatus = (o) => String(o.paymentStatus || o.paymentInfo?.status || '').toLowerCase();
+    const isPaidStatus = (s) => ['paid', 'collected', 'completed'].includes(s);
+    const isPendingStatus = (s) => ['pending', 'unpaid', ''].includes(s);
+    const isCOD = (m) => m === 'cod';
+    const isOnline = (m) => ['card', 'upi', 'netbanking', 'razorpay', 'online'].includes(m);
 
-    // Format month label (YYYY-MM → short month)
-    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const revenueByMonth = revenueByMonthAgg.map((m) => {
-      const [y, mo] = m._id.split('-');
-      return { month: monthNames[parseInt(mo, 10) - 1] || m._id, revenue: m.revenue, orders: m.orders };
+    // Order counting logic
+    const validOrders = allOrders.filter(o => o.orderStatus !== 'cancelled');
+    const totalOrders = validOrders.length;
+
+    const onlinePaidOrders = allOrders.filter(o => isOnline(getMethod(o)) && isPaidStatus(getPayStatus(o))).length;
+    const codPendingOrders = allOrders.filter(o => isCOD(getMethod(o)) && isPendingStatus(getPayStatus(o)) && o.orderStatus !== 'cancelled').length;
+    const cancelledOrders = allOrders.filter(o => o.orderStatus === 'cancelled').length;
+
+    const activeRentals = allOrders.filter(o => ['confirmed', 'shipped', 'delivered'].includes(o.orderStatus)).length;
+
+    // Revenue calculations - only Paid/Collected orders
+    const totalRevenue = allOrders
+      .filter(o => isPaidStatus(getPayStatus(o)) && o.orderStatus !== 'cancelled')
+      .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+    const pendingCODAmount = allOrders
+      .filter(o => isCOD(getMethod(o)) && isPendingStatus(getPayStatus(o)) && o.orderStatus !== 'cancelled')
+      .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+    const codCollectedRevenue = allOrders
+      .filter(o => isCOD(getMethod(o)) && isPaidStatus(getPayStatus(o)) && o.orderStatus !== 'cancelled')
+      .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+    // Revenue by month from paid/collected orders
+    const monthMap = {};
+    allOrders.forEach(o => {
+      if (!isPaidStatus(getPayStatus(o)) || o.orderStatus === 'cancelled') return;
+      const d = new Date(o.createdAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthMap[key]) monthMap[key] = { revenue: 0, orders: 0 };
+      monthMap[key].revenue += (o.totalAmount || 0);
+      monthMap[key].orders += 1;
     });
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const revenueByMonth = Object.keys(monthMap).sort().slice(-12).map(key => {
+      const [, mo] = key.split('-');
+      return { month: monthNames[parseInt(mo, 10) - 1], revenue: monthMap[key].revenue, orders: monthMap[key].orders };
+    });
+
+    // Top products aggregation
+    const topProductsAgg = await Order.aggregate([
+      { $unwind: '$orderItems' },
+      {
+        $group: {
+          _id: '$orderItems.product',
+          name: { $first: '$orderItems.name' },
+          image: { $first: '$orderItems.image' },
+          orderCount: { $sum: '$orderItems.quantity' },
+          revenue: {
+            $sum: {
+              $multiply: [
+                '$orderItems.monthlyRent',
+                '$orderItems.rentalDuration',
+                '$orderItems.quantity'
+              ]
+            }
+          }
+        }
+      },
+      { $sort: { orderCount: -1 } },
+      { $limit: 5 }
+    ]);
 
     res.json({
       success: true,
       stats: {
         totalOrders,
+        onlinePaidOrders,
+        codPendingOrders,
+        cancelledOrders,
         totalRevenue,
+        pendingCODAmount,
+        codCollectedRevenue,
         activeRentals,
         totalCustomers,
         totalAdmins,
-        totalProducts,
+        totalProducts
       },
       revenueByMonth,
       topProducts: topProductsAgg,
-      recentOrders,
+      recentOrders
     });
   } catch (error) {
     console.error('Get Stats Error:', error);
@@ -342,27 +323,48 @@ export const getAllOrdersAdmin = async (req, res) => {
 };
 
 /**
- * @desc   Update order status
+ * @desc   Update order status / payment status (admin)
  * @route  PUT /api/admin/orders/:id/status
  * @access Private/Admin
  */
 export const updateOrderStatusAdmin = async (req, res) => {
   try {
-    const { status } = req.body;
-    const allowed = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned'];
-    if (!allowed.includes(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid status' });
-    }
-    const update = { orderStatus: status };
-    if (status === 'delivered') update.deliveredAt = new Date();
+    const { status, paymentStatus } = req.body;
+    const allowedStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned'];
+    const allowedPaymentStatuses = ['pending', 'unpaid', 'paid', 'collected', 'completed', 'failed', 'refunded'];
 
-    const order = await Order.findByIdAndUpdate(req.params.id, update, { new: true }).populate(
-      'user',
-      'name email'
-    );
+    const update = {};
+
+    if (status) {
+      if (!allowedStatuses.includes(status)) {
+        return res.status(400).json({ success: false, message: 'Invalid order status' });
+      }
+      update.orderStatus = status;
+      if (status === 'delivered') update.deliveredAt = new Date();
+    }
+
+    if (paymentStatus) {
+      const normalized = String(paymentStatus).toLowerCase();
+      if (!allowedPaymentStatuses.includes(normalized)) {
+        return res.status(400).json({ success: false, message: 'Invalid payment status' });
+      }
+      update.paymentStatus = normalized;
+      update['paymentInfo.status'] = normalized;
+      if (['paid', 'collected', 'completed'].includes(normalized)) {
+        update.isPaid = true;
+        update.paidAt = new Date();
+      }
+    }
+
+    if (Object.keys(update).length === 0) {
+      return res.status(400).json({ success: false, message: 'No update fields provided' });
+    }
+
+    const order = await Order.findByIdAndUpdate(req.params.id, update, { new: true })
+      .populate('user', 'name email');
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
-    res.json({ success: true, message: 'Order status updated', order });
+    res.json({ success: true, message: 'Order updated', order });
   } catch (error) {
     console.error('Update Order Status Error:', error);
     res.status(500).json({ success: false, message: 'Failed to update order', error: error.message });
@@ -383,4 +385,3 @@ export const getAllUsersAdmin = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to fetch users', error: error.message });
   }
 };
-

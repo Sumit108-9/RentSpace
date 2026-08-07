@@ -140,14 +140,14 @@ const Layout = () => {
               background: '#1D9E75', color: 'white', textDecoration: 'none', border: 'none'
             }}>Login</Link>
           )}
-          <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'none' }} className="mobile-menu-btn">
+          <button onClick={() => setMenuOpen(!menuOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer' }} className="mobile-menu-btn">
             {menuOpen ? <X style={{ width: 18, height: 18, color: '#888780' }} /> : <Menu style={{ width: 18, height: 18, color: '#888780' }} />}
           </button>
         </div>
       </nav>
 
       {/* Mobile menu */}
-      {menuOpen && <div style={{
+      {menuOpen && <div className="mobile-menu" style={{
         background: '#fff', borderBottom: '0.5px solid #e8e6df', padding: '12px 20px',
         display: 'flex', flexDirection: 'column', gap: 12, fontSize: 12, flexShrink: 0
       }}>

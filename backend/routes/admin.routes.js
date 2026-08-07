@@ -25,7 +25,7 @@ const router = express.Router();
  */
 
 // Public route - Admin login
-router.post('/login', validateAdminLogin, adminLogin);
+router.post('/login', adminLogin);
 
 /**
  * Admin Product Management Routes

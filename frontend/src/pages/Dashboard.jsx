@@ -28,9 +28,9 @@ const Dashboard = () => {
             ['pending', 'confirmed', 'shipped'].includes(o.orderStatus)
           ).length;
           
-          // Calculate total spent from paid orders
+          // Calculate total spent from all orders (including COD orders)
           const totalSpent = orders
-            .filter(o => o.isPaid)
+            .filter(o => o.orderStatus !== 'cancelled')
             .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
           
           // Get recent orders (last 3)

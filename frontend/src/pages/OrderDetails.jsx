@@ -255,7 +255,7 @@ const OrderDetails = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ fontSize: 14, color: '#888780' }}>Qty: {item.quantity || 1}</div>
                       <div style={{ fontSize: 16, fontWeight: 600, color: '#085041' }}>
-                        {formatCurrency(item.monthlyRent * item.rentalDuration * (item.quantity || 1))}
+                        {formatCurrency(item.monthlyRent * item.rentalDuration)}
                       </div>
                     </div>
                   </div>
@@ -269,9 +269,9 @@ const OrderDetails = () => {
                 <MapPin style={{ width: 20, height: 20 }} /> Shipping Address
               </div>
               <div style={{ fontSize: 15, color: '#2C2C2A', lineHeight: 1.6 }}>
-                <div style={{ fontWeight: 500, marginBottom: 4 }}>{order.shippingAddress?.name || order.contactInfo?.name}</div>
-                <div>{order.shippingAddress?.address}</div>
-                <div>{order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.pincode}</div>
+                <div style={{ fontWeight: 500, marginBottom: 4 }}>{order.contactInfo?.name}</div>
+                <div>{order.shippingAddress?.street}</div>
+                <div>{order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.zipCode}</div>
                 <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, color: '#888780' }}>
                   <Phone style={{ width: 14, height: 14 }} /> {order.contactInfo?.phone}
                 </div>

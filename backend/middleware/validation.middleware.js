@@ -1,4 +1,5 @@
 import { body, param, validationResult } from 'express-validator';
+import mongoose from 'mongoose';
 
 // Helper function to handle validation errors
 const handleValidationErrors = (req, res, next) => {
@@ -273,7 +274,11 @@ export const validateReview = [
 // Order Validation
 export const validateOrderId = [
   param('id')
-    .isMongoId().withMessage('Invalid order ID'),
+    .custom((value) => {
+      // Allow either MongoDB ObjectId or orderId string (like RS-2026-0001)
+      return mongoose.Types.ObjectId.isValid(value) || /^RS-\d{4}-\d{4}$/.test(value);
+    })
+    .withMessage('Invalid order ID'),
   
   handleValidationErrors
 ];

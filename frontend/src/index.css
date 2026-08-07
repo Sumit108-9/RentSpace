@@ -246,3 +246,293 @@
     opacity: 1;
   }
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  /* Hide desktop nav links */
+  .nav-links-desktop {
+    display: none !important;
+  }
+  
+  /* Show mobile menu button */
+  .mobile-menu-btn {
+    display: block !important;
+  }
+  
+  /* Adjust navbar for mobile */
+  nav {
+    padding: 0 16px !important;
+    height: 70px !important;
+  }
+  
+  /* Adjust logo size for mobile */
+  nav img {
+    height: 50px !important;
+  }
+  
+  /* Adjust location selector for mobile */
+  nav > div:first-child > div:last-child {
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+  }
+  
+  /* Adjust nav icons for mobile */
+  nav > div:last-child > a svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  
+  /* Adjust login button for mobile */
+  nav > div:last-child > a:last-of-type {
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+  }
+  
+  /* Adjust user avatar for mobile */
+  nav > div:last-child > div > a > div {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 13px !important;
+  }
+  
+  /* Adjust logout button for mobile */
+  nav > div:last-child > div > button svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  /* Mobile menu styling */
+  .mobile-menu {
+    padding: 16px !important;
+    font-size: 14px !important;
+  }
+  
+  .mobile-menu a {
+    padding: 12px 0 !important;
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens */
+  nav {
+    padding: 0 12px !important;
+    height: 60px !important;
+  }
+  
+  nav img {
+    height: 40px !important;
+  }
+  
+  /* Hide location selector on very small screens */
+  nav > div:first-child > div:last-child {
+    display: none !important;
+  }
+  
+  /* Reduce gap between nav icons */
+  nav > div:last-child {
+    gap: 16px !important;
+  }
+  
+  /* Adjust cart badge for mobile */
+  nav > div:last-child > a:nth-child(3) span {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 11px !important;
+    top: -6px !important;
+    right: -6px !important;
+  }
+  
+  /* Location modal responsive */
+  [style*="position: fixed"][style*="z-index: 2000"] {
+    padding: 16px !important;
+  }
+  
+  [style*="position: fixed"][style*="z-index: 2000"] > div {
+    padding: 24px !important;
+    max-height: 85vh !important;
+  }
+  
+  /* Cities grid responsive */
+  [style*="gridTemplateColumns: 'repeat(4, 1fr)'"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  
+  /* Modal title responsive */
+  [style*="fontFamily: \"'Playfair Display', serif\""][style*="fontSize: 28"] {
+    font-size: 22px !important;
+  }
+  
+  /* Pincode input responsive */
+  [style*="height: 56"][style*="borderRadius: 28"] {
+    height: 48px !important;
+    padding: 0 50px 0 16px !important;
+    font-size: 14px !important;
+  }
+  
+  /* City cards responsive */
+  [style*="width: 60"][style*="height: 60"] {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 24px !important;
+  }
+  
+  /* Admin layout responsive */
+  .admin-layout header {
+    height: 70px !important;
+    padding: 0 16px !important;
+  }
+  
+  .admin-layout header img {
+    height: 50px !important;
+  }
+  
+  .admin-layout aside {
+    display: none !important;
+  }
+  
+  .admin-layout main {
+    padding: 16px !important;
+  }
+  
+  /* Home page responsive */
+  [style*="padding: '32px 64px'"] {
+    padding: 16px !important;
+  }
+  
+  /* Hero section responsive */
+  [style*="gridTemplateColumns: '1fr 1fr'"][style*="gap: 48"] {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+  
+  [style*="fontSize: 54"][style*="fontFamily: \"'Playfair Display', serif\""] {
+    font-size: 32px !important;
+  }
+  
+  [style*="fontSize: 18"][style*="color: '#888780'"] {
+    font-size: 14px !important;
+  }
+  
+  /* Trust bar responsive */
+  [style*="borderTop: '0.5px solid #E8E6DF'"][style*="background: '#fff'"] {
+    flex-wrap: wrap !important;
+  }
+  
+  [style*="flex: 1"][style*="padding: '20px 32px'"] {
+    flex: 1 1 50% !important;
+    padding: 16px !important;
+  }
+  
+  /* Featured products grid responsive */
+  [style*="gridTemplateColumns: 'repeat(4, 1fr)'"][style*="gap: 28"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+  
+  /* Why choose section responsive */
+  [style*="gridTemplateColumns: 'repeat(4, 1fr)'"][style*="marginTop: 28"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+  
+  /* Products page responsive */
+  [style*="padding: '32px 64px'"][style*="overflowY: 'auto'"] {
+    padding: 16px !important;
+  }
+  
+  /* Filter panel responsive */
+  [style*="gridTemplateColumns: '220px 1fr'"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  [style*="background: '#fff'"][style*="borderRight: '0.5px solid #E8E6DF'"] {
+    border-right: none !important;
+    border-bottom: '0.5px solid #E8E6DF' !important;
+    padding: 16px !important;
+  }
+  
+  /* Search bar responsive */
+  [style*="maxWidth: 400"] {
+    max-width: 100% !important;
+  }
+  
+  /* Product cards responsive */
+  [style*="height: 260"] {
+    height: 200px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens - single column layouts */
+  [style*="gridTemplateColumns: 'repeat(2, 1fr)'"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Hero image height */
+  [style*="height: 450"] {
+    height: 250px !important;
+  }
+  
+  /* Trust bar - single column */
+  [style*="flex: 1"][style*="padding: '20px 32px'"] {
+    flex: 1 1 100% !important;
+  }
+  
+  /* Product card image height */
+  [style*="height: 200"] {
+    height: 180px !important;
+  }
+  
+  [style*="height: 250"] {
+    height: 180px !important;
+  }
+  
+  /* Button sizes */
+  [style*="padding: '14px 28px'"] {
+    padding: 10px 20px !important;
+    font-size: 14px !important;
+  }
+  
+  /* Section titles */
+  [style*="fontSize: 26"] {
+    font-size: 20px !important;
+  }
+  
+  [style*="fontSize: 28"] {
+    font-size: 20px !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Tablet responsive */
+  nav {
+    padding: 0 24px !important;
+    height: 80px !important;
+  }
+  
+  nav img {
+    height: 60px !important;
+  }
+  
+  /* Featured products - 3 columns on tablet */
+  [style*="gridTemplateColumns: 'repeat(4, 1fr)'"][style*="gap: 28"] {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  /* Why choose - 3 columns on tablet */
+  [style*="gridTemplateColumns: 'repeat(4, 1fr)'"][style*="marginTop: 28"] {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  /* Products page - 3 columns on tablet */
+  [style*="gridTemplateColumns: 'repeat(4, 1fr)'"] {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  /* Cities grid - 3 columns on tablet */
+  [style*="gridTemplateColumns: 'repeat(2, 1fr)'"] {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}

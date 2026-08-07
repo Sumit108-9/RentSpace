@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Order from '../models/order.model.js';
 import Product from '../models/product.model.js';
 import User from '../models/user.model.js';
@@ -69,10 +70,20 @@ export const getOrders = async (req, res, next) => {
 
 export const getOrderById = async (req, res, next) => {
   try {
-    const order = await Order.findById(req.params.id)
-      .populate('orderItems.product', 'name images monthlyRent')
-      .populate('user', 'name email phone')
-      .lean();
+    let order;
+    
+    // Try to find by MongoDB ObjectId first, then by orderId
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      order = await Order.findById(req.params.id)
+        .populate('orderItems.product', 'name images monthlyRent')
+        .populate('user', 'name email phone')
+        .lean();
+    } else {
+      order = await Order.findOne({ orderId: req.params.id })
+        .populate('orderItems.product', 'name images monthlyRent')
+        .populate('user', 'name email phone')
+        .lean();
+    }
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
