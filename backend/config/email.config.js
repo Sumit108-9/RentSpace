@@ -6,9 +6,8 @@ export const emailConfig = {
   port: 587,
   secure: false, // true for 465, false for other ports
   auth: {
-    user: process.env.EMAIL_USER || 'sumitdevv416@gmail.com',
-    // Gmail app password - remove spaces when using
-    pass: (process.env.EMAIL_PASS || 'edhfzhevigolnjwk').replace(/\s/g, '')
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
 };
 
