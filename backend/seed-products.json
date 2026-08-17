@@ -1,6 +1,6 @@
 [
   {
-    "_id": "s1",
+    "_id": "sofa1",
     "name": "Brown Leather Sofa",
     "description": "Classic brown leather sofa with tufted design. Perfect for elegant living rooms.",
     "category": "sofa",
@@ -9,86 +9,150 @@
       "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800"
     ],
     "monthlyRent": 2199,
-    "securityDeposit": 10000,
+    "securityDeposit": 8796,
     "originalPrice": 55000,
-    "rating": 4.5,
-    "numReviews": 123,
-    "countInStock": 10,
+    "rating": 4.0,
+    "numReviews": 31,
+    "countInStock": 19,
     "features": [
       "Leather Upholstery",
       "Classic Design",
       "Deep Button Tufting"
     ],
     "dimensions": {
-      "length": 84,
-      "width": 36,
-      "height": 32
+      "length": 71,
+      "width": 54,
+      "height": 42
     },
     "material": "Leather",
     "color": "Brown",
     "isActive": true,
-    "isFeatured": true,
+    "isFeatured": false,
     "minRentalPeriod": 3,
     "maxRentalPeriod": 24
   },
   {
-    "_id": "s2",
-    "name": "Gray Sectional Sofa",
-    "description": "Modern gray sectional sofa with fabric upholstery. Spacious seating for large living rooms.",
+    "_id": "sofa2",
+    "name": "Green Velvet L-Shape Sofa",
+    "description": "Luxurious green velvet L-shaped sectional for spacious and modern living areas.",
     "category": "sofa",
     "subcategory": "sectional",
     "images": [
       "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800"
     ],
-    "monthlyRent": 2499,
-    "securityDeposit": 12000,
+    "monthlyRent": 2599,
+    "securityDeposit": 10396,
     "originalPrice": 65000,
-    "rating": 4.6,
-    "numReviews": 89,
-    "countInStock": 8,
+    "rating": 4.7,
+    "numReviews": 76,
+    "countInStock": 14,
     "features": [
-      "L-Shaped Design",
-      "Premium Fabric",
-      "Spacious Seating"
+      "L-Shape",
+      "Soft Velvet",
+      "Wooden Legs"
     ],
     "dimensions": {
-      "length": 96,
-      "width": 72,
-      "height": 32
+      "length": 87,
+      "width": 41,
+      "height": 36
+    },
+    "material": "Velvet",
+    "color": "Green",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "sofa3",
+    "name": "Modern Grey Fabric Couch",
+    "description": "Minimalist grey fabric couch, perfectly suits contemporary decors.",
+    "category": "sofa",
+    "subcategory": "couch",
+    "images": [
+      "https://images.unsplash.com/photo-1540574163026-643ea20d25b5?w=800"
+    ],
+    "monthlyRent": 1499,
+    "securityDeposit": 5996,
+    "originalPrice": 30000,
+    "rating": 4.3,
+    "numReviews": 238,
+    "countInStock": 10,
+    "features": [
+      "High-Density Foam",
+      "Washable Covers",
+      "Minimalist"
+    ],
+    "dimensions": {
+      "length": 70,
+      "width": 43,
+      "height": 37
     },
     "material": "Fabric",
-    "color": "Gray",
+    "color": "Grey",
     "isActive": true,
     "isFeatured": true,
     "minRentalPeriod": 3,
     "maxRentalPeriod": 24
   },
   {
-    "_id": "s3",
-    "name": "Beige 3-Seater Sofa",
-    "description": "Comfortable beige 3-seater sofa with fabric cushions. Perfect for small apartments.",
+    "_id": "sofa4",
+    "name": "Minimalist White Futon",
+    "description": "Space-saving white futon that converts easily into a guest bed.",
     "category": "sofa",
-    "subcategory": "3-seater",
+    "subcategory": "futon",
     "images": [
-      "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=800"
+      "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=800"
     ],
-    "monthlyRent": 1599,
-    "securityDeposit": 7000,
-    "originalPrice": 38000,
-    "rating": 4.4,
-    "numReviews": 156,
-    "countInStock": 12,
+    "monthlyRent": 1199,
+    "securityDeposit": 4796,
+    "originalPrice": 20000,
+    "rating": 4.9,
+    "numReviews": 225,
+    "countInStock": 10,
     "features": [
-      "3-Seater",
-      "Comfortable Cushions",
-      "Compact Design"
+      "Convertible",
+      "Compact",
+      "Modern"
     ],
     "dimensions": {
-      "length": 78,
-      "width": 34,
-      "height": 30
+      "length": 55,
+      "width": 33,
+      "height": 34
     },
-    "material": "Fabric",
+    "material": "Cotton Blend",
+    "color": "White",
+    "isActive": true,
+    "isFeatured": true,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "sofa5",
+    "name": "Classic Beige Loveseat",
+    "description": "Cozy 2-seater loveseat in a neutral beige shade.",
+    "category": "sofa",
+    "subcategory": "loveseat",
+    "images": [
+      "https://images.unsplash.com/photo-1550254478-ead40cc54513?w=800"
+    ],
+    "monthlyRent": 1299,
+    "securityDeposit": 5196,
+    "originalPrice": 25000,
+    "rating": 4.0,
+    "numReviews": 15,
+    "countInStock": 15,
+    "features": [
+      "Compact Seating",
+      "Neutral Tone",
+      "Durable Frame"
+    ],
+    "dimensions": {
+      "length": 66,
+      "width": 57,
+      "height": 47
+    },
+    "material": "Polyester",
     "color": "Beige",
     "isActive": true,
     "isFeatured": false,
@@ -96,767 +160,223 @@
     "maxRentalPeriod": 24
   },
   {
-    "_id": "s4",
-    "name": "Black Recliner Sofa",
-    "description": "Luxury black recliner sofa with leather finish and adjustable backrest.",
-    "category": "sofa",
-    "subcategory": "recliner",
-    "images": [
-      "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800"
-    ],
-    "monthlyRent": 3299,
-    "securityDeposit": 15000,
-    "originalPrice": 85000,
-    "rating": 4.8,
-    "numReviews": 67,
-    "countInStock": 5,
-    "features": [
-      "Reclining Function",
-      "Premium Leather",
-      "Luxurious"
-    ],
-    "dimensions": {
-      "length": 84,
-      "width": 40,
-      "height": 34
-    },
-    "material": "Leather",
-    "color": "Black",
-    "isActive": true,
-    "isFeatured": true,
-    "minRentalPeriod": 6,
-    "maxRentalPeriod": 24
-  },
-  {
-    "_id": "s5",
-    "name": "Blue Sofa Bed",
-    "description": "Multi-functional blue sofa that converts to a bed. Includes storage compartment.",
-    "category": "sofa",
-    "subcategory": "sofa-cum-bed",
-    "images": [
-      "https://images.unsplash.com/photo-1550226891-ef816aed4a98?w=800"
-    ],
-    "monthlyRent": 1899,
-    "securityDeposit": 8500,
-    "originalPrice": 45000,
-    "rating": 4.2,
-    "numReviews": 94,
-    "countInStock": 10,
-    "features": [
-      "Convertible to Bed",
-      "Storage Compartment",
-      "Space Saving"
-    ],
-    "dimensions": {
-      "length": 72,
-      "width": 36,
-      "height": 30
-    },
-    "material": "Fabric",
-    "color": "Blue",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 3,
-    "maxRentalPeriod": 24
-  },
-  {
-    "_id": "b1",
-    "name": "King Size Bed",
-    "description": "Spacious king size bed with modern design. Perfect for master bedrooms.",
+    "_id": "bed1",
+    "name": "King Size Wooden Bed",
+    "description": "Solid teak wood king size bed frame with intricate headboard.",
     "category": "bed",
     "subcategory": "king",
     "images": [
       "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800"
     ],
-    "monthlyRent": 2999,
-    "securityDeposit": 13000,
-    "originalPrice": 75000,
-    "rating": 4.7,
-    "numReviews": 145,
-    "countInStock": 6,
+    "monthlyRent": 1899,
+    "securityDeposit": 7596,
+    "originalPrice": 45000,
+    "rating": 4.0,
+    "numReviews": 21,
+    "countInStock": 19,
     "features": [
       "King Size",
-      "Modern Design",
-      "Comfortable"
+      "Solid Wood",
+      "Sturdy Frame"
     ],
     "dimensions": {
-      "length": 84,
-      "width": 78,
-      "height": 48
+      "length": 89,
+      "width": 54,
+      "height": 27
     },
-    "material": "Wood",
-    "color": "White",
+    "material": "Teak Wood",
+    "color": "Brown",
     "isActive": true,
-    "isFeatured": true,
+    "isFeatured": false,
     "minRentalPeriod": 3,
     "maxRentalPeriod": 24
   },
   {
-    "_id": "b2",
-    "name": "Queen Size Bed",
-    "description": "Comfortable queen bed with upholstered headboard. Modern design.",
+    "_id": "bed2",
+    "name": "Queen Size Upholstered Bed",
+    "description": "Plush queen size bed with a grey button-tufted upholstered headboard.",
     "category": "bed",
     "subcategory": "queen",
     "images": [
-      "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=800"
+      "https://images.unsplash.com/photo-1537726235470-daa00d8e6cf8?w=800"
     ],
-    "monthlyRent": 2499,
-    "securityDeposit": 11000,
-    "originalPrice": 58000,
-    "rating": 4.5,
-    "numReviews": 189,
-    "countInStock": 8,
+    "monthlyRent": 1599,
+    "securityDeposit": 6396,
+    "originalPrice": 38000,
+    "rating": 4.1,
+    "numReviews": 218,
+    "countInStock": 17,
     "features": [
-      "Queen Size",
       "Upholstered Headboard",
-      "Modern Design"
+      "Queen Size",
+      "No Noise Design"
     ],
     "dimensions": {
-      "length": 80,
-      "width": 72,
-      "height": 46
+      "length": 59,
+      "width": 37,
+      "height": 22
     },
-    "material": "Wood",
-    "color": "White",
+    "material": "Wood & Fabric",
+    "color": "Grey",
     "isActive": true,
-    "isFeatured": true,
+    "isFeatured": false,
     "minRentalPeriod": 3,
     "maxRentalPeriod": 24
   },
   {
-    "_id": "b3",
-    "name": "Single Bed",
-    "description": "Compact single bed with modern design. Perfect for kids rooms.",
+    "_id": "bed3",
+    "name": "Metal Frame Single Bed",
+    "description": "Simple, sleek black metal single bed frame, ideal for bachelors or kids.",
     "category": "bed",
     "subcategory": "single",
     "images": [
-      "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=800"
+      "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=800"
     ],
-    "monthlyRent": 999,
-    "securityDeposit": 5000,
-    "originalPrice": 25000,
-    "rating": 4.3,
-    "numReviews": 234,
-    "countInStock": 12,
+    "monthlyRent": 899,
+    "securityDeposit": 3596,
+    "originalPrice": 12000,
+    "rating": 4.8,
+    "numReviews": 145,
+    "countInStock": 4,
+    "isActive": true,
+    "isFeatured": true,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24,
     "features": [
-      "Single Size",
-      "Compact Design",
-      "Modern Style"
+      "Lightweight",
+      "Durable",
+      "Easy to Assemble"
     ],
     "dimensions": {
-      "length": 72,
-      "width": 48,
-      "height": 36
+      "length": 54,
+      "width": 55,
+      "height": 33
     },
-    "material": "Wood",
-    "color": "White",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 3,
-    "maxRentalPeriod": 24
+    "material": "Metal",
+    "color": "Black"
   },
   {
-    "_id": "b4",
-    "name": "Bunk Bed",
-    "description": "Space-saving bunk bed with safety rails and ladder. Great for shared rooms.",
+    "_id": "bed4",
+    "name": "Queen Storage Bed",
+    "description": "Hydraulic storage bed in engineered wood with spacious compartments.",
     "category": "bed",
-    "subcategory": "bunk",
+    "subcategory": "storage",
     "images": [
-      "https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=800"
+      "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800"
     ],
-    "monthlyRent": 1499,
-    "securityDeposit": 7000,
-    "originalPrice": 35000,
-    "rating": 4.4,
-    "numReviews": 145,
-    "countInStock": 7,
+    "monthlyRent": 1799,
+    "securityDeposit": 7196,
+    "originalPrice": 42000,
+    "rating": 4.6,
+    "numReviews": 163,
+    "countInStock": 17,
     "features": [
-      "Bunk Design",
-      "Safety Rails",
+      "Hydraulic Storage",
+      "Premium Finish",
       "Space Saving"
     ],
     "dimensions": {
-      "length": 78,
-      "width": 48,
-      "height": 72
+      "length": 64,
+      "width": 21,
+      "height": 46
     },
-    "material": "Wood",
-    "color": "White",
+    "material": "Engineered Wood",
+    "color": "Walnut",
     "isActive": true,
     "isFeatured": false,
     "minRentalPeriod": 3,
     "maxRentalPeriod": 24
   },
   {
-    "_id": "b5",
-    "name": "Platform Bed",
-    "description": "Low-profile platform bed with modern minimalist design. No box spring needed.",
+    "_id": "bed5",
+    "name": "Bunk Bed with Mattress",
+    "description": "Sturdy wooden bunk bed set, perfect for shared children's rooms.",
     "category": "bed",
-    "subcategory": "platform",
+    "subcategory": "bunk",
     "images": [
-      "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=800"
+      "https://images.unsplash.com/photo-1555636222-cae831e670b3?w=800"
     ],
-    "monthlyRent": 1799,
-    "securityDeposit": 8000,
-    "originalPrice": 40000,
-    "rating": 4.3,
-    "numReviews": 167,
-    "countInStock": 9,
+    "monthlyRent": 1999,
+    "securityDeposit": 7996,
+    "originalPrice": 35000,
+    "rating": 4.8,
+    "numReviews": 148,
+    "countInStock": 7,
     "features": [
-      "Low Profile",
-      "No Box Spring",
-      "Modern Design"
+      "Ladder included",
+      "Safety Rails",
+      "Includes mattresses"
     ],
     "dimensions": {
-      "length": 80,
-      "width": 72,
-      "height": 18
+      "length": 55,
+      "width": 45,
+      "height": 48
     },
-    "material": "Wood",
-    "color": "Gray",
+    "material": "Pine Wood",
+    "color": "Natural",
     "isActive": true,
     "isFeatured": false,
     "minRentalPeriod": 3,
     "maxRentalPeriod": 24
   },
   {
-    "_id": "t1",
-    "name": "Dining Table",
-    "description": "6-seater dining table with solid wood top. Perfect for family meals.",
+    "_id": "table1",
+    "name": "Round Glass Coffee Table",
+    "description": "Contemporary round coffee table with tempered glass top.",
     "category": "table",
-    "subcategory": "dining",
+    "subcategory": "coffee",
     "images": [
-      "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=800"
+      "https://images.unsplash.com/photo-1532372576444-dda954194ad0?w=800"
     ],
-    "monthlyRent": 1299,
-    "securityDeposit": 5500,
-    "originalPrice": 28000,
-    "rating": 4.5,
-    "numReviews": 178,
-    "countInStock": 10,
+    "monthlyRent": 599,
+    "securityDeposit": 2396,
+    "originalPrice": 10000,
+    "rating": 4.8,
+    "numReviews": 135,
+    "countInStock": 17,
     "features": [
-      "6-Seater",
-      "Solid Wood Top",
-      "Sturdy Construction"
+      "Tempered Glass",
+      "Gold Finish Base",
+      "Modern Look"
     ],
     "dimensions": {
-      "length": 72,
-      "width": 36,
-      "height": 30
+      "length": 61,
+      "width": 20,
+      "height": 42
     },
-    "material": "Wood",
-    "color": "Brown",
+    "material": "Glass & Metal",
+    "color": "Clear/Gold",
     "isActive": true,
     "isFeatured": true,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
   },
   {
-    "_id": "t2",
-    "name": "Study Desk",
-    "description": "Spacious study desk with drawers and cable management. Perfect for home office.",
+    "_id": "table2",
+    "name": "Wooden Study Table",
+    "description": "Spacious wooden study desk with three drawers for storage.",
     "category": "table",
     "subcategory": "study",
     "images": [
       "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800"
     ],
     "monthlyRent": 799,
-    "securityDeposit": 3500,
+    "securityDeposit": 3196,
     "originalPrice": 15000,
-    "rating": 4.5,
-    "numReviews": 234,
-    "countInStock": 12,
-    "features": [
-      "Spacious Top",
-      "Drawers Included",
-      "Cable Management"
-    ],
-    "dimensions": {
-      "length": 54,
-      "width": 28,
-      "height": 30
-    },
-    "material": "Wood",
-    "color": "White",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "t3",
-    "name": "Coffee Table",
-    "description": "Modern coffee table with glass top and metal legs. Stylish centerpiece.",
-    "category": "table",
-    "subcategory": "coffee",
-    "images": [
-      "https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=800"
-    ],
-    "monthlyRent": 499,
-    "securityDeposit": 2000,
-    "originalPrice": 8000,
-    "rating": 4.3,
-    "numReviews": 267,
-    "countInStock": 15,
-    "features": [
-      "Glass Top",
-      "Metal Legs",
-      "Modern Design"
-    ],
-    "dimensions": {
-      "length": 48,
-      "width": 24,
-      "height": 18
-    },
-    "material": "Glass",
-    "color": "Clear",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "t4",
-    "name": "Side Table",
-    "description": "Compact side table with drawer. Perfect for bedside or living room.",
-    "category": "table",
-    "subcategory": "side",
-    "images": [
-      "https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=800"
-    ],
-    "monthlyRent": 299,
-    "securityDeposit": 1200,
-    "originalPrice": 5000,
     "rating": 4.2,
-    "numReviews": 289,
-    "countInStock": 20,
-    "features": [
-      "Compact Design",
-      "Drawer Included",
-      "Versatile"
-    ],
-    "dimensions": {
-      "length": 24,
-      "width": 20,
-      "height": 24
-    },
-    "material": "Wood",
-    "color": "Walnut",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "t5",
-    "name": "Console Table",
-    "description": "Elegant console table for entryway or hallway. Decorative and functional.",
-    "category": "table",
-    "subcategory": "console",
-    "images": [
-      "https://images.unsplash.com/photo-1400133356422-5a1f755a724c?w=800"
-    ],
-    "monthlyRent": 599,
-    "securityDeposit": 2500,
-    "originalPrice": 10000,
-    "rating": 4.4,
-    "numReviews": 145,
-    "countInStock": 10,
-    "features": [
-      "Elegant Design",
-      "Entryway Perfect",
-      "Decorative"
-    ],
-    "dimensions": {
-      "length": 48,
-      "width": 14,
-      "height": 32
-    },
-    "material": "Wood",
-    "color": "White",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "c1",
-    "name": "Armchair",
-    "description": "Comfortable armchair with padded armrests. Perfect for reading nooks.",
-    "category": "chair",
-    "subcategory": "armchair",
-    "images": [
-      "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=800"
-    ],
-    "monthlyRent": 799,
-    "securityDeposit": 3500,
-    "originalPrice": 12000,
-    "rating": 4.4,
-    "numReviews": 178,
-    "countInStock": 14,
-    "features": [
-      "Padded Armrests",
-      "Comfortable",
-      "Reading Perfect"
-    ],
-    "dimensions": {
-      "length": 32,
-      "width": 32,
-      "height": 36
-    },
-    "material": "Fabric",
-    "color": "Gray",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "c2",
-    "name": "Dining Chair",
-    "description": "Comfortable dining chair with cushioned seat. Available in sets.",
-    "category": "chair",
-    "subcategory": "dining",
-    "images": [
-      "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=800"
-    ],
-    "monthlyRent": 299,
-    "securityDeposit": 1200,
-    "originalPrice": 4000,
-    "rating": 4.3,
-    "numReviews": 345,
-    "countInStock": 25,
-    "features": [
-      "Cushioned Seat",
-      "Comfortable Back",
-      "Set Available"
-    ],
-    "dimensions": {
-      "length": 20,
-      "width": 20,
-      "height": 36
-    },
-    "material": "Wood",
-    "color": "Brown",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "c3",
-    "name": "Recliner Chair",
-    "description": "Luxurious leather recliner chair with multiple positions. Perfect for relaxation.",
-    "category": "chair",
-    "subcategory": "recliner",
-    "images": [
-      "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800"
-    ],
-    "monthlyRent": 1299,
-    "securityDeposit": 5000,
-    "originalPrice": 18000,
-    "rating": 4.7,
-    "numReviews": 123,
-    "countInStock": 8,
-    "features": [
-      "Multiple Positions",
-      "Luxurious",
-      "Comfortable"
-    ],
-    "dimensions": {
-      "length": 36,
-      "width": 36,
-      "height": 42
-    },
-    "material": "Leather",
-    "color": "Brown",
-    "isActive": true,
-    "isFeatured": true,
-    "minRentalPeriod": 3,
-    "maxRentalPeriod": 24
-  },
-  {
-    "_id": "c4",
-    "name": "Accent Chair",
-    "description": "Stylish accent chair with modern design. Perfect for living rooms.",
-    "category": "chair",
-    "subcategory": "accent",
-    "images": [
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800"
-    ],
-    "monthlyRent": 599,
-    "securityDeposit": 2500,
-    "originalPrice": 8000,
-    "rating": 4.4,
-    "numReviews": 156,
+    "numReviews": 27,
     "countInStock": 12,
     "features": [
-      "Modern Design",
-      "Comfortable",
-      "Stylish"
+      "3 Drawers",
+      "Cable Management",
+      "Ergonomic Height"
     ],
     "dimensions": {
-      "length": 30,
-      "width": 30,
-      "height": 34
-    },
-    "material": "Fabric",
-    "color": "Teal",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "c5",
-    "name": "Office Chair",
-    "description": "Ergonomic office chair with lumbar support and adjustable height. Perfect for work.",
-    "category": "chair",
-    "subcategory": "office",
-    "images": [
-      "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=800"
-    ],
-    "monthlyRent": 899,
-    "securityDeposit": 3500,
-    "originalPrice": 12000,
-    "rating": 4.5,
-    "numReviews": 234,
-    "countInStock": 15,
-    "features": [
-      "Ergonomic Design",
-      "Lumbar Support",
-      "Adjustable Height"
-    ],
-    "dimensions": {
-      "length": 26,
+      "length": 79,
       "width": 26,
-      "height": 44
+      "height": 50
     },
-    "material": "Mesh",
-    "color": "Black",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "w1",
-    "name": "3-Door Wardrobe",
-    "description": "Spacious 3-door wardrobe with shelves and hanging space. Modern design.",
-    "category": "wardrobe",
-    "subcategory": "3-door",
-    "images": [
-      "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800"
-    ],
-    "monthlyRent": 1499,
-    "securityDeposit": 6000,
-    "originalPrice": 22000,
-    "rating": 4.4,
-    "numReviews": 145,
-    "countInStock": 10,
-    "features": [
-      "3 Doors",
-      "Shelves Included",
-      "Hanging Space"
-    ],
-    "dimensions": {
-      "length": 72,
-      "width": 24,
-      "height": 84
-    },
-    "material": "Wood",
-    "color": "White",
-    "isActive": true,
-    "isFeatured": true,
-    "minRentalPeriod": 3,
-    "maxRentalPeriod": 24
-  },
-  {
-    "_id": "w2",
-    "name": "2-Door Wardrobe",
-    "description": "Compact 2-door wardrobe with drawers. Perfect for small bedrooms.",
-    "category": "wardrobe",
-    "subcategory": "2-door",
-    "images": [
-      "https://images.unsplash.com/photo-1558997519-83ea9252edf6?w=800"
-    ],
-    "monthlyRent": 999,
-    "securityDeposit": 4000,
-    "originalPrice": 18000,
-    "rating": 4.2,
-    "numReviews": 178,
-    "countInStock": 12,
-    "features": [
-      "2 Doors",
-      "Drawers Included",
-      "Compact Design"
-    ],
-    "dimensions": {
-      "length": 60,
-      "width": 24,
-      "height": 78
-    },
-    "material": "Wood",
-    "color": "Brown",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 3,
-    "maxRentalPeriod": 24
-  },
-  {
-    "_id": "w3",
-    "name": "Sliding Door Wardrobe",
-    "description": "Space-saving sliding door wardrobe with full-length mirror. Modern aesthetic.",
-    "category": "wardrobe",
-    "subcategory": "sliding",
-    "images": [
-      "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800"
-    ],
-    "monthlyRent": 1799,
-    "securityDeposit": 7000,
-    "originalPrice": 28000,
-    "rating": 4.5,
-    "numReviews": 112,
-    "countInStock": 7,
-    "features": [
-      "Sliding Doors",
-      "Full Mirror",
-      "Space Saving"
-    ],
-    "dimensions": {
-      "length": 72,
-      "width": 26,
-      "height": 84
-    },
-    "material": "Wood",
-    "color": "White",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 3,
-    "maxRentalPeriod": 24
-  },
-  {
-    "_id": "w4",
-    "name": "Walk-in Wardrobe",
-    "description": "Modular walk-in wardrobe system with customizable layout. Luxurious storage.",
-    "category": "wardrobe",
-    "subcategory": "walk-in",
-    "images": [
-      "https://images.unsplash.com/photo-1558997519-83ea9252edf6?w=800"
-    ],
-    "monthlyRent": 3499,
-    "securityDeposit": 14000,
-    "originalPrice": 60000,
-    "rating": 4.8,
-    "numReviews": 56,
-    "countInStock": 3,
-    "features": [
-      "Modular Design",
-      "Customizable Layout",
-      "Luxurious"
-    ],
-    "dimensions": {
-      "length": 96,
-      "width": 72,
-      "height": 96
-    },
-    "material": "Wood",
-    "color": "White",
-    "isActive": true,
-    "isFeatured": true,
-    "minRentalPeriod": 6,
-    "maxRentalPeriod": 24
-  },
-  {
-    "_id": "w5",
-    "name": "Corner Wardrobe",
-    "description": "L-shaped corner wardrobe for maximum space utilization. Perfect for corners.",
-    "category": "wardrobe",
-    "subcategory": "corner",
-    "images": [
-      "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800"
-    ],
-    "monthlyRent": 1999,
-    "securityDeposit": 8000,
-    "originalPrice": 32000,
-    "rating": 4.3,
-    "numReviews": 89,
-    "countInStock": 5,
-    "features": [
-      "L-Shaped",
-      "Corner Design",
-      "Space Efficient"
-    ],
-    "dimensions": {
-      "length": 72,
-      "width": 72,
-      "height": 84
-    },
-    "material": "Wood",
-    "color": "Walnut",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 6,
-    "maxRentalPeriod": 24
-  },
-  {
-    "_id": "d1",
-    "name": "6-Seater Dining Set",
-    "description": "Complete dining set with table and 6 chairs. Family friendly design.",
-    "category": "dining",
-    "subcategory": "6-seater",
-    "images": [
-      "https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=800"
-    ],
-    "monthlyRent": 2999,
-    "securityDeposit": 12000,
-    "originalPrice": 55000,
-    "rating": 4.6,
-    "numReviews": 189,
-    "countInStock": 6,
-    "features": [
-      "6 Chairs Included",
-      "Solid Wood Table",
-      "Family Friendly"
-    ],
-    "dimensions": {
-      "length": 72,
-      "width": 36,
-      "height": 30
-    },
-    "material": "Wood",
-    "color": "Brown",
-    "isActive": true,
-    "isFeatured": true,
-    "minRentalPeriod": 3,
-    "maxRentalPeriod": 24
-  },
-  {
-    "_id": "d2",
-    "name": "4-Seater Dining Set",
-    "description": "Compact dining set perfect for small families. Space efficient design.",
-    "category": "dining",
-    "subcategory": "4-seater",
-    "images": [
-      "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800"
-    ],
-    "monthlyRent": 1999,
-    "securityDeposit": 8000,
-    "originalPrice": 38000,
-    "rating": 4.4,
-    "numReviews": 234,
-    "countInStock": 10,
-    "features": [
-      "4 Chairs Included",
-      "Compact Design",
-      "Space Efficient"
-    ],
-    "dimensions": {
-      "length": 60,
-      "width": 36,
-      "height": 30
-    },
-    "material": "Wood",
+    "material": "Oak Wood",
     "color": "Oak",
     "isActive": true,
     "isFeatured": false,
@@ -864,409 +384,899 @@
     "maxRentalPeriod": 24
   },
   {
-    "_id": "d3",
-    "name": "8-Seater Dining Set",
-    "description": "Large dining set for big families and gatherings. Premium quality.",
-    "category": "dining",
-    "subcategory": "8-seater",
+    "_id": "table3",
+    "name": "Minimalist Work Desk",
+    "description": "Clean white work desk with a sleek metal frame.",
+    "category": "table",
+    "subcategory": "study",
     "images": [
-      "https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=800"
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800"
     ],
-    "monthlyRent": 3999,
-    "securityDeposit": 16000,
-    "originalPrice": 75000,
-    "rating": 4.7,
-    "numReviews": 78,
-    "countInStock": 4,
+    "monthlyRent": 699,
+    "securityDeposit": 2796,
+    "originalPrice": 12000,
+    "rating": 4.2,
+    "numReviews": 85,
+    "countInStock": 11,
     "features": [
-      "8 Chairs Included",
-      "Large Table",
-      "Premium Quality"
+      "Minimalist",
+      "Scratch Resistant",
+      "Lightweight"
+    ],
+    "dimensions": {
+      "length": 70,
+      "width": 49,
+      "height": 48
+    },
+    "material": "MDF & Steel",
+    "color": "White",
+    "isActive": true,
+    "isFeatured": true,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "table4",
+    "name": "Rustic End Table",
+    "description": "Small rustic wooden end table for living rooms or bedrooms.",
+    "category": "table",
+    "subcategory": "end_table",
+    "images": [
+      "https://images.unsplash.com/photo-1565538810630-b302c0c7a52f?w=800"
+    ],
+    "monthlyRent": 399,
+    "securityDeposit": 1596,
+    "originalPrice": 6000,
+    "rating": 4.7,
+    "numReviews": 291,
+    "countInStock": 12,
+    "features": [
+      "Rustic Finish",
+      "Compact Size",
+      "Handcrafted"
+    ],
+    "dimensions": {
+      "length": 89,
+      "width": 46,
+      "height": 46
+    },
+    "material": "Reclaimed Wood",
+    "color": "Brown",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "table5",
+    "name": "Foldable Laptop Table",
+    "description": "Portable and foldable laptop table for working from bed or sofa.",
+    "category": "table",
+    "subcategory": "portable",
+    "images": [
+      "https://images.unsplash.com/photo-1611080531557-046636edfb9f?w=800"
+    ],
+    "monthlyRent": 199,
+    "securityDeposit": 796,
+    "originalPrice": 2500,
+    "rating": 4.7,
+    "numReviews": 183,
+    "countInStock": 14,
+    "features": [
+      "Foldable Legs",
+      "Adjustable Angle",
+      "Cooling Vents"
+    ],
+    "dimensions": {
+      "length": 45,
+      "width": 56,
+      "height": 47
+    },
+    "material": "Bamboo",
+    "color": "Natural",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "chair1",
+    "name": "Ergonomic Office Chair",
+    "description": "High-back ergonomic mesh office chair with lumbar support.",
+    "category": "chair",
+    "subcategory": "office",
+    "images": [
+      "https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?w=800"
+    ],
+    "monthlyRent": 699,
+    "securityDeposit": 2796,
+    "originalPrice": 15000,
+    "rating": 4.3,
+    "numReviews": 121,
+    "countInStock": 20,
+    "features": [
+      "Lumbar Support",
+      "Adjustable Height",
+      "Breathable Mesh"
+    ],
+    "dimensions": {
+      "length": 84,
+      "width": 33,
+      "height": 32
+    },
+    "material": "Mesh & Plastic",
+    "color": "Black",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "chair2",
+    "name": "Modern Dining Chair",
+    "description": "Sleek dining chair with upholstered seat and wooden legs.",
+    "category": "chair",
+    "subcategory": "dining",
+    "images": [
+      "https://images.unsplash.com/photo-1562663474-6cbb3eaa4d14?w=800"
+    ],
+    "monthlyRent": 299,
+    "securityDeposit": 1196,
+    "originalPrice": 5000,
+    "rating": 4.7,
+    "numReviews": 108,
+    "countInStock": 11,
+    "features": [
+      "Comfortable Seat",
+      "Mid-Century Modern",
+      "Sturdy"
+    ],
+    "dimensions": {
+      "length": 90,
+      "width": 44,
+      "height": 41
+    },
+    "material": "Wood & Fabric",
+    "color": "Grey",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "chair3",
+    "name": "Velvet Accent Chair",
+    "description": "Elegant blue velvet accent chair for living rooms or bedrooms.",
+    "category": "chair",
+    "subcategory": "accent",
+    "images": [
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800"
+    ],
+    "monthlyRent": 899,
+    "securityDeposit": 3596,
+    "originalPrice": 18000,
+    "rating": 4.1,
+    "numReviews": 105,
+    "countInStock": 10,
+    "features": [
+      "Gold Legs",
+      "Plush Seating",
+      "Statement Piece"
+    ],
+    "dimensions": {
+      "length": 46,
+      "width": 23,
+      "height": 39
+    },
+    "material": "Velvet",
+    "color": "Blue",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "chair4",
+    "name": "Wooden Rocking Chair",
+    "description": "Classic wooden rocking chair, perfect for reading or relaxing.",
+    "category": "chair",
+    "subcategory": "lounge",
+    "images": [
+      "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=800"
+    ],
+    "monthlyRent": 599,
+    "securityDeposit": 2396,
+    "originalPrice": 12000,
+    "rating": 5.0,
+    "numReviews": 196,
+    "countInStock": 3,
+    "features": [
+      "Smooth Rocking",
+      "Classic Design",
+      "Durable Finish"
+    ],
+    "dimensions": {
+      "length": 58,
+      "width": 43,
+      "height": 45
+    },
+    "material": "Teak Wood",
+    "color": "Brown",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "chair5",
+    "name": "Plastic Stackable Chair",
+    "description": "Durable and lightweight plastic chair for indoor/outdoor use.",
+    "category": "chair",
+    "subcategory": "outdoor",
+    "images": [
+      "https://images.unsplash.com/photo-1581539250439-c96689b516cf?w=800"
+    ],
+    "monthlyRent": 99,
+    "securityDeposit": 396,
+    "originalPrice": 1500,
+    "rating": 4.1,
+    "numReviews": 186,
+    "countInStock": 16,
+    "features": [
+      "Stackable",
+      "Weather Resistant",
+      "Easy Clean"
+    ],
+    "dimensions": {
+      "length": 72,
+      "width": 48,
+      "height": 37
+    },
+    "material": "Plastic",
+    "color": "White",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "wardrobe1",
+    "name": "3-Door Wooden Wardrobe",
+    "description": "Spacious 3-door wardrobe with mirrors and internal lockers.",
+    "category": "wardrobe",
+    "subcategory": "wardrobe",
+    "images": [
+      "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=800"
+    ],
+    "monthlyRent": 1499,
+    "securityDeposit": 5996,
+    "originalPrice": 35000,
+    "rating": 4.4,
+    "numReviews": 60,
+    "countInStock": 6,
+    "features": [
+      "Built-in Mirror",
+      "Internal Locker",
+      "Hanging Rods"
+    ],
+    "dimensions": {
+      "length": 70,
+      "width": 55,
+      "height": 42
+    },
+    "material": "Engineered Wood",
+    "color": "Walnut",
+    "isActive": true,
+    "isFeatured": true,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "wardrobe2",
+    "name": "2-Door Sliding Wardrobe",
+    "description": "Modern sliding door wardrobe with sleek design and ample storage.",
+    "category": "wardrobe",
+    "subcategory": "sliding",
+    "images": [
+      "https://images.unsplash.com/photo-1558997519-83ea9252edf8?w=800"
+    ],
+    "monthlyRent": 1299,
+    "securityDeposit": 5196,
+    "originalPrice": 30000,
+    "rating": 4.2,
+    "numReviews": 45,
+    "countInStock": 8,
+    "features": [
+      "Sliding Doors",
+      "Space Saving",
+      "Modern Finish"
+    ],
+    "dimensions": {
+      "length": 72,
+      "width": 24,
+      "height": 84
+    },
+    "material": "MDF",
+    "color": "White",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "wardrobe3",
+    "name": "Corner Wardrobe Unit",
+    "description": "L-shaped corner wardrobe maximizing storage in compact spaces.",
+    "category": "wardrobe",
+    "subcategory": "corner",
+    "images": [
+      "https://images.unsplash.com/photo-1558997519-83ea9252edf8?w=800"
+    ],
+    "monthlyRent": 1699,
+    "securityDeposit": 6796,
+    "originalPrice": 40000,
+    "rating": 4.5,
+    "numReviews": 32,
+    "countInStock": 5,
+    "features": [
+      "Corner Design",
+      "Maximum Storage",
+      "Adjustable Shelves"
+    ],
+    "dimensions": {
+      "length": 60,
+      "width": 60,
+      "height": 78
+    },
+    "material": "Particle Board",
+    "color": "Oak",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "wardrobe4",
+    "name": "Walk-in Closet System",
+    "description": "Modular walk-in closet system with multiple compartments and drawers.",
+    "category": "wardrobe",
+    "subcategory": "walkin",
+    "images": [
+      "https://images.unsplash.com/photo-1558997519-83ea9252edf8?w=800"
+    ],
+    "monthlyRent": 2499,
+    "securityDeposit": 9996,
+    "originalPrice": 60000,
+    "rating": 4.8,
+    "numReviews": 28,
+    "countInStock": 3,
+    "features": [
+      "Modular Design",
+      "Multiple Compartments",
+      "Premium Finish"
     ],
     "dimensions": {
       "length": 96,
-      "width": 42,
-      "height": 30
+      "width": 72,
+      "height": 84
     },
-    "material": "Wood",
-    "color": "Mahogany",
+    "material": "Solid Wood",
+    "color": "Natural",
     "isActive": true,
     "isFeatured": true,
     "minRentalPeriod": 6,
     "maxRentalPeriod": 24
   },
   {
-    "_id": "d4",
-    "name": "Round Dining Set",
-    "description": "Elegant round dining table with 4 chairs. Modern aesthetic design.",
-    "category": "dining",
-    "subcategory": "round",
+    "_id": "wardrobe5",
+    "name": "Open Wardrobe with Shelves",
+    "description": "Open wardrobe design with shelves and hanging space for modern bedrooms.",
+    "category": "wardrobe",
+    "subcategory": "open",
     "images": [
-      "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800"
+      "https://images.unsplash.com/photo-1558997519-83ea9252edf8?w=800"
     ],
-    "monthlyRent": 2299,
-    "securityDeposit": 9000,
-    "originalPrice": 42000,
-    "rating": 4.5,
-    "numReviews": 112,
-    "countInStock": 7,
+    "monthlyRent": 999,
+    "securityDeposit": 3996,
+    "originalPrice": 25000,
+    "rating": 4.3,
+    "numReviews": 55,
+    "countInStock": 10,
     "features": [
-      "Round Table",
-      "4 Chairs Included",
-      "Modern Aesthetic"
+      "Open Design",
+      "Easy Access",
+      "Modern Look"
     ],
     "dimensions": {
-      "diameter": 54,
-      "height": 30
+      "length": 48,
+      "width": 20,
+      "height": 72
     },
-    "material": "Wood",
-    "color": "White",
+    "material": "Metal & Wood",
+    "color": "Black",
     "isActive": true,
     "isFeatured": false,
     "minRentalPeriod": 3,
     "maxRentalPeriod": 24
   },
   {
-    "_id": "d5",
-    "name": "Extendable Dining Set",
-    "description": "Table extends to accommodate more guests. Versatile for different occasions.",
-    "category": "dining",
-    "subcategory": "extendable",
-    "images": [
-      "https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=800"
-    ],
-    "monthlyRent": 2699,
-    "securityDeposit": 11000,
-    "originalPrice": 48000,
-    "rating": 4.4,
-    "numReviews": 134,
-    "countInStock": 6,
-    "features": [
-      "Extendable Design",
-      "6-8 Seater",
-      "Versatile"
-    ],
-    "dimensions": {
-      "length": 72,
-      "width": 36,
-      "height": 30
-    },
-    "material": "Wood",
-    "color": "Walnut",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 3,
-    "maxRentalPeriod": 24
-  },
-  {
-    "_id": "st1",
-    "name": "Bookshelf",
-    "description": "5-shelf bookshelf for books and decor. Adjustable shelves for flexibility.",
+    "_id": "storage1",
+    "name": "Tall Bookshelf",
+    "description": "5-tier tall wooden bookshelf for living room or study.",
     "category": "storage",
     "subcategory": "bookshelf",
     "images": [
       "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800"
     ],
-    "monthlyRent": 599,
-    "securityDeposit": 2500,
-    "originalPrice": 10000,
-    "rating": 4.4,
-    "numReviews": 234,
-    "countInStock": 12,
+    "monthlyRent": 699,
+    "securityDeposit": 2796,
+    "originalPrice": 12000,
+    "rating": 4.3,
+    "numReviews": 181,
+    "countInStock": 14,
     "features": [
-      "5 Shelves",
-      "Adjustable",
-      "Sturdy"
+      "5 Tiers",
+      "Sturdy Base",
+      "Open Design"
     ],
     "dimensions": {
-      "length": 36,
-      "width": 12,
-      "height": 72
+      "length": 68,
+      "width": 24,
+      "height": 33
     },
     "material": "Wood",
     "color": "Brown",
     "isActive": true,
     "isFeatured": false,
-    "minRentalPeriod": 6,
+    "minRentalPeriod": 3,
     "maxRentalPeriod": 24
   },
   {
-    "_id": "st2",
-    "name": "TV Unit",
-    "description": "Modern TV unit with storage compartments and cable management.",
-    "category": "storage",
-    "subcategory": "tv-unit",
-    "images": [
-      "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=800"
-    ],
-    "monthlyRent": 899,
-    "securityDeposit": 3500,
-    "originalPrice": 15000,
-    "rating": 4.5,
-    "numReviews": 189,
-    "countInStock": 12,
-    "features": [
-      "Storage Compartments",
-      "Cable Management",
-      "Modern Design"
-    ],
-    "dimensions": {
-      "length": 60,
-      "width": 18,
-      "height": 24
-    },
-    "material": "Wood",
-    "color": "Walnut",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "st3",
-    "name": "Shoe Rack",
-    "description": "Multi-tier shoe rack for organized storage. Compact and efficient design.",
-    "category": "storage",
-    "subcategory": "shoe-rack",
-    "images": [
-      "https://images.unsplash.com/photo-1558997519-83ea9252edf6?w=800"
-    ],
-    "monthlyRent": 299,
-    "securityDeposit": 1200,
-    "originalPrice": 4000,
-    "rating": 4.2,
-    "numReviews": 267,
-    "countInStock": 20,
-    "features": [
-      "Multi-Tier",
-      "Organized Storage",
-      "Compact"
-    ],
-    "dimensions": {
-      "length": 30,
-      "width": 12,
-      "height": 48
-    },
-    "material": "Metal",
-    "color": "Chrome",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "st4",
-    "name": "Storage Cabinet",
-    "description": "Versatile storage cabinet with adjustable shelves. Multipurpose use.",
+    "_id": "storage2",
+    "name": "Metal Filing Cabinet",
+    "description": "3-drawer metal filing cabinet with lock for office organization.",
     "category": "storage",
     "subcategory": "cabinet",
     "images": [
-      "https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800"
+      "https://images.unsplash.com/photo-1595089308479-7a0e386ab0a0?w=800"
+    ],
+    "monthlyRent": 499,
+    "securityDeposit": 1996,
+    "originalPrice": 8000,
+    "rating": 4.5,
+    "numReviews": 298,
+    "countInStock": 18,
+    "features": [
+      "Central Lock",
+      "Anti-tilt mechanism",
+      "Smooth Drawers"
+    ],
+    "dimensions": {
+      "length": 72,
+      "width": 51,
+      "height": 26
+    },
+    "material": "Steel",
+    "color": "Grey",
+    "isActive": true,
+    "isFeatured": true,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "storage3",
+    "name": "TV Console Unit",
+    "description": "Modern low-profile TV console unit with cable management.",
+    "category": "storage",
+    "subcategory": "console",
+    "images": [
+      "https://images.unsplash.com/photo-1600607686527-6fb886090705?w=800"
     ],
     "monthlyRent": 799,
-    "securityDeposit": 3000,
-    "originalPrice": 12000,
-    "rating": 4.3,
-    "numReviews": 178,
-    "countInStock": 10,
+    "securityDeposit": 3196,
+    "originalPrice": 15000,
+    "rating": 4.4,
+    "numReviews": 290,
+    "countInStock": 17,
     "features": [
-      "Adjustable Shelves",
-      "Multipurpose",
-      "Versatile"
+      "Cable Management",
+      "Media Storage",
+      "Modern Finish"
+    ],
+    "dimensions": {
+      "length": 67,
+      "width": 44,
+      "height": 45
+    },
+    "material": "MDF",
+    "color": "White/Oak",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "storage4",
+    "name": "Chest of Drawers",
+    "description": "Wooden chest featuring 4 spacious drawers for clothing or linens.",
+    "category": "storage",
+    "subcategory": "drawers",
+    "images": [
+      "https://images.unsplash.com/photo-1591129841117-3adfd313e34f?w=800"
+    ],
+    "monthlyRent": 899,
+    "securityDeposit": 3596,
+    "originalPrice": 18000,
+    "rating": 3.9,
+    "numReviews": 18,
+    "countInStock": 20,
+    "features": [
+      "Smooth Glides",
+      "Deep Drawers",
+      "Compact Footprint"
+    ],
+    "dimensions": {
+      "length": 52,
+      "width": 47,
+      "height": 37
+    },
+    "material": "Solid Wood",
+    "color": "Cherry",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "storage5",
+    "name": "Shoe Rack Cabinet",
+    "description": "Multi-tier shoe rack cabinet with doors for organized shoe storage.",
+    "category": "storage",
+    "subcategory": "shoe_rack",
+    "images": [
+      "https://images.unsplash.com/photo-1558997519-83ea9252edf8?w=800"
+    ],
+    "monthlyRent": 399,
+    "securityDeposit": 1596,
+    "originalPrice": 6000,
+    "rating": 4.2,
+    "numReviews": 67,
+    "countInStock": 15,
+    "features": [
+      "Multiple Tiers",
+      "Door Storage",
+      "Compact Design"
     ],
     "dimensions": {
       "length": 36,
-      "width": 18,
-      "height": 72
+      "width": 12,
+      "height": 48
     },
-    "material": "Wood",
+    "material": "Particle Board",
     "color": "White",
     "isActive": true,
     "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
   },
   {
-    "_id": "st5",
-    "name": "Kitchen Rack",
-    "description": "Wall-mounted kitchen rack for spices and utensils. Space-saving solution.",
-    "category": "storage",
-    "subcategory": "kitchen-rack",
+    "_id": "dining1",
+    "name": "4-Seater Wooden Dining Set",
+    "description": "Classic square wooden dining table with 4 upholstered chairs.",
+    "category": "dining",
+    "subcategory": "dining_set",
     "images": [
-      "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=800"
+      "https://images.unsplash.com/photo-1617806118233-18e1c0945594?w=800"
     ],
-    "monthlyRent": 399,
-    "securityDeposit": 1500,
-    "originalPrice": 5000,
-    "rating": 4.1,
-    "numReviews": 145,
+    "monthlyRent": 1599,
+    "securityDeposit": 6396,
+    "originalPrice": 32000,
+    "rating": 4.3,
+    "numReviews": 173,
+    "countInStock": 7,
+    "features": [
+      "Includes 4 Chairs",
+      "Solid Wood Frame",
+      "Family Sized"
+    ],
+    "dimensions": {
+      "length": 48,
+      "width": 42,
+      "height": 45
+    },
+    "material": "Wood",
+    "color": "Brown",
+    "isActive": true,
+    "isFeatured": true,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "dining2",
+    "name": "Glass Top 6-Seater Dining Set",
+    "description": "Elegant rectangular glass top dining table with 6 leatherette chairs.",
+    "category": "dining",
+    "subcategory": "dining_set",
+    "images": [
+      "https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=800"
+    ],
+    "monthlyRent": 2299,
+    "securityDeposit": 9196,
+    "originalPrice": 55000,
+    "rating": 4.6,
+    "numReviews": 280,
     "countInStock": 15,
     "features": [
-      "Wall Mounted",
-      "Space Saver",
-      "Organized"
+      "Tempered Glass",
+      "6 Chairs",
+      "Easy to Clean"
     ],
     "dimensions": {
-      "length": 36,
-      "width": 8,
-      "height": 24
+      "length": 53,
+      "width": 52,
+      "height": 28
     },
-    "material": "Metal",
-    "color": "Silver",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "dc1",
-    "name": "Floor Lamp",
-    "description": "Modern floor lamp with adjustable brightness. Stylish lighting solution.",
-    "category": "decor",
-    "subcategory": "floor-lamp",
-    "images": [
-      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800"
-    ],
-    "monthlyRent": 299,
-    "securityDeposit": 1200,
-    "originalPrice": 4000,
-    "rating": 4.3,
-    "numReviews": 234,
-    "countInStock": 18,
-    "features": [
-      "Adjustable Brightness",
-      "Modern Design",
-      "Stylish"
-    ],
-    "dimensions": {
-      "height": 60
-    },
-    "material": "Metal",
+    "material": "Glass & Metal",
     "color": "Black",
     "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
+    "isFeatured": true,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
   },
   {
-    "_id": "dc2",
-    "name": "Table Lamp",
-    "description": "Elegant table lamp with fabric shade. Warm and cozy lighting.",
+    "_id": "dining3",
+    "name": "Round Dining Table with 2 Chairs",
+    "description": "Compact round dining set perfect for couples or small apartments.",
+    "category": "dining",
+    "subcategory": "dining_set",
+    "images": [
+      "https://images.unsplash.com/photo-1503602642458-232111445657?w=800"
+    ],
+    "monthlyRent": 999,
+    "securityDeposit": 3996,
+    "originalPrice": 18000,
+    "rating": 4.0,
+    "numReviews": 283,
+    "countInStock": 9,
+    "features": [
+      "Space Saving",
+      "Modern Aesthetic",
+      "Includes 2 Chairs"
+    ],
+    "dimensions": {
+      "length": 83,
+      "width": 21,
+      "height": 49
+    },
+    "material": "MDF & Wood",
+    "color": "White/Natural",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "dining4",
+    "name": "Minimalist Square Dining Set",
+    "description": "Contemporary minimalist 4-seater dining set in matte black finish.",
+    "category": "dining",
+    "subcategory": "dining_set",
+    "images": [
+      "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=800"
+    ],
+    "monthlyRent": 1399,
+    "securityDeposit": 5596,
+    "originalPrice": 28000,
+    "rating": 4.7,
+    "numReviews": 95,
+    "countInStock": 19,
+    "features": [
+      "Matte Finish",
+      "Scratch Resistant",
+      "Compact Layout"
+    ],
+    "dimensions": {
+      "length": 78,
+      "width": 28,
+      "height": 45
+    },
+    "material": "Metal & Wood",
+    "color": "Black",
+    "isActive": true,
+    "isFeatured": true,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "dining5",
+    "name": "Premium Marble Top Dining Set",
+    "description": "Luxurious 6-seater dining set with a faux marble top and velvet chairs.",
+    "category": "dining",
+    "subcategory": "dining_set",
+    "images": [
+      "https://images.unsplash.com/photo-1580974511812-4b715651c6eb?w=800"
+    ],
+    "monthlyRent": 3499,
+    "securityDeposit": 13996,
+    "originalPrice": 85000,
+    "rating": 4.9,
+    "numReviews": 300,
+    "countInStock": 4,
+    "features": [
+      "Luxury Finish",
+      "Velvet Chairs",
+      "Heavy & Sturdy"
+    ],
+    "dimensions": {
+      "length": 67,
+      "width": 31,
+      "height": 32
+    },
+    "material": "Faux Marble",
+    "color": "White/Gold",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "decor1",
+    "name": "Modern Floor Lamp",
+    "description": "Elegant floor lamp with adjustable height for ambient lighting.",
     "category": "decor",
-    "subcategory": "table-lamp",
+    "subcategory": "lighting",
     "images": [
       "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=800"
     ],
-    "monthlyRent": 199,
-    "securityDeposit": 800,
-    "originalPrice": 2500,
-    "rating": 4.3,
-    "numReviews": 289,
+    "monthlyRent": 299,
+    "securityDeposit": 1196,
+    "originalPrice": 4000,
+    "rating": 4.5,
+    "numReviews": 89,
     "countInStock": 25,
     "features": [
-      "Fabric Shade",
-      "Warm Light",
-      "Elegant"
+      "Adjustable Height",
+      "LED Compatible",
+      "Modern Design"
     ],
     "dimensions": {
-      "height": 18
+      "length": 12,
+      "width": 12,
+      "height": 60
     },
     "material": "Metal",
     "color": "Gold",
     "isActive": true,
     "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
   },
   {
-    "_id": "dc3",
-    "name": "Wall Clock",
-    "description": "Modern wall clock with silent movement. Minimalist design.",
-    "category": "decor",
-    "subcategory": "wall-clock",
-    "images": [
-      "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=800"
-    ],
-    "monthlyRent": 99,
-    "securityDeposit": 400,
-    "originalPrice": 1500,
-    "rating": 4.2,
-    "numReviews": 345,
-    "countInStock": 30,
-    "features": [
-      "Silent Movement",
-      "Minimalist Design",
-      "Modern Style"
-    ],
-    "dimensions": {
-      "diameter": 18
-    },
-    "material": "Metal",
-    "color": "Silver",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "dc4",
-    "name": "Vase Set",
-    "description": "Ceramic vase set of 3. Modern minimalist design for decor.",
-    "category": "decor",
-    "subcategory": "vase",
-    "images": [
-      "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=800"
-    ],
-    "monthlyRent": 299,
-    "securityDeposit": 1000,
-    "originalPrice": 3500,
-    "rating": 4.2,
-    "numReviews": 145,
-    "countInStock": 18,
-    "features": [
-      "Set of 3",
-      "Ceramic",
-      "Modern Design"
-    ],
-    "dimensions": {
-      "height": 12
-    },
-    "material": "Ceramic",
-    "color": "White",
-    "isActive": true,
-    "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
-  },
-  {
-    "_id": "dc5",
-    "name": "Wall Mirror",
-    "description": "Decorative wall mirror with elegant frame. Adds depth to any room.",
+    "_id": "decor2",
+    "name": "Decorative Wall Mirror",
+    "description": "Round decorative mirror with gold frame for living room or bedroom.",
     "category": "decor",
     "subcategory": "mirror",
     "images": [
       "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800"
     ],
-    "monthlyRent": 399,
-    "securityDeposit": 1500,
-    "originalPrice": 5000,
-    "rating": 4.4,
-    "numReviews": 178,
-    "countInStock": 15,
+    "monthlyRent": 199,
+    "securityDeposit": 796,
+    "originalPrice": 3000,
+    "rating": 4.3,
+    "numReviews": 56,
+    "countInStock": 18,
     "features": [
-      "Elegant Frame",
-      "Decorative",
-      "Adds Depth"
+      "Gold Frame",
+      "Easy to Mount",
+      "Elegant Design"
     ],
     "dimensions": {
       "length": 36,
-      "width": 24
+      "width": 36,
+      "height": 2
     },
-    "material": "Wood",
+    "material": "Glass & Metal",
     "color": "Gold",
     "isActive": true,
     "isFeatured": false,
-    "minRentalPeriod": 1,
-    "maxRentalPeriod": 12
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "decor3",
+    "name": "Indoor Plant Stand",
+    "description": "Multi-tier plant stand for displaying indoor plants and decor.",
+    "category": "decor",
+    "subcategory": "plant_stand",
+    "images": [
+      "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=800"
+    ],
+    "monthlyRent": 249,
+    "securityDeposit": 996,
+    "originalPrice": 2500,
+    "rating": 4.6,
+    "numReviews": 78,
+    "countInStock": 22,
+    "features": [
+      "3 Tiers",
+      "Sturdy Construction",
+      "Modern Look"
+    ],
+    "dimensions": {
+      "length": 18,
+      "width": 18,
+      "height": 42
+    },
+    "material": "Metal",
+    "color": "Black",
+    "isActive": true,
+    "isFeatured": true,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "decor4",
+    "name": "Decorative Vase Set",
+    "description": "Set of 3 ceramic vases in different sizes for home decoration.",
+    "category": "decor",
+    "subcategory": "vase",
+    "images": [
+      "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=800"
+    ],
+    "monthlyRent": 149,
+    "securityDeposit": 596,
+    "originalPrice": 2000,
+    "rating": 4.4,
+    "numReviews": 45,
+    "countInStock": 30,
+    "features": [
+      "Set of 3",
+      "Ceramic Material",
+      "Modern Design"
+    ],
+    "dimensions": {
+      "length": 8,
+      "width": 8,
+      "height": 24
+    },
+    "material": "Ceramic",
+    "color": "White",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
+  },
+  {
+    "_id": "decor5",
+    "name": "Wall Art Canvas",
+    "description": "Modern abstract wall art canvas for living room or office decoration.",
+    "category": "decor",
+    "subcategory": "wall_art",
+    "images": [
+      "https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=800"
+    ],
+    "monthlyRent": 199,
+    "securityDeposit": 796,
+    "originalPrice": 3500,
+    "rating": 4.7,
+    "numReviews": 112,
+    "countInStock": 15,
+    "features": [
+      "Abstract Design",
+      "Ready to Hang",
+      "High Quality Print"
+    ],
+    "dimensions": {
+      "length": 36,
+      "width": 24,
+      "height": 1
+    },
+    "material": "Canvas",
+    "color": "Multi",
+    "isActive": true,
+    "isFeatured": false,
+    "minRentalPeriod": 3,
+    "maxRentalPeriod": 24
   }
 ]
