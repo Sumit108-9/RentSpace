@@ -1,7 +1,10 @@
 import api from '../utils/api';
 
-const RAZORPAY_KEY_ID =
-  import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_Sk28HdT74t9GDF';
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY;
+
+if (!RAZORPAY_KEY_ID) {
+  console.error('RAZORPAY_KEY_ID environment variable is not set');
+}
 
 export const loadRazorpayScript = () => {
   return new Promise((resolve) => {
