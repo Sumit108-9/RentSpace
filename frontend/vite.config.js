@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// Firebase build fix: removed problematic manual chunk and switched to esbuild
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
