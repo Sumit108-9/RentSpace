@@ -52,10 +52,12 @@ app.use(rateLimit({
 
 
 // 🔥 ✅ PROPER CORS (LOCAL + PRODUCTION)
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://rent-space-pi.vercel.app"
-];
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+  : [
+      "http://localhost:5173",
+      "https://rent-space-pi.vercel.app"
+    ];
 
 app.use(cors({
   origin: function (origin, callback) {

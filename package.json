@@ -5,7 +5,11 @@
   "scripts": {
     "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
     "install-all": "cd backend && npm install && cd ../frontend && npm install",
-    "build": "cd frontend && npm run build"
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "start:prod": "NODE_ENV=production cd backend && npm start",
+    "build:frontend": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
