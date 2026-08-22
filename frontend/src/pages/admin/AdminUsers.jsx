@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, UserCheck, Mail, Search } from 'lucide-react';
 import useStore from '../../store/useStore';
+import api from '../../utils/api';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -14,8 +15,8 @@ const AdminUsers = () => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const res = await fetch('/api/admin/users', { headers: { Authorization: `Bearer ${getToken()}` } });
-        const data = await res.json();
+        const response = await api.get('/admin/users');
+        const data = response.data;
         if (data.success) setUsers(data.users || []);
       } catch (e) {
         setUsers([]);

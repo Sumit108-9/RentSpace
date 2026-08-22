@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import api from '../utils/api';
 
 /* ============================================
    PART 4: FIREBASE CLOUD MESSAGING SERVICE
@@ -77,18 +78,10 @@ export const sendOrderNotification = async (orderId, customerName) => {
   }
   
   try {
-    const response = await fetch('/api/notifications/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token,
-        title: 'Order Confirmed',
-        body: `Hi ${customerName}, your RentSpace order #${orderId?.slice(-8)} has been placed successfully!`,
-        icon: '/logo192.png',
-        data: { orderId, type: 'order_confirmation', clickAction: '/orders' }
-      })
-    });
-    return response.ok;
+    // #region agent log
+    fetch('http://127.0.0.1:7633/ingest/82148fb8-03cb-44ac-8ce0-01502e70d163',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ecd83c'},body:JSON.stringify({sessionId:'ecd83c',runId:'pre-fix',hypothesisId:'D',location:'firebase.service.js:sendOrderNotification',message:'Notification endpoint not implemented on backend - skipping',data:{orderId},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+    return false;
   } catch (error) {
     console.error('Send notification error:', error);
     return false;
@@ -100,12 +93,7 @@ export const subscribeToTopic = async (topic) => {
   if (!token) return false;
   
   try {
-    const response = await fetch('/api/notifications/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, topic })
-    });
-    return response.ok;
+    return false;
   } catch (error) {
     console.error('Subscribe error:', error);
     return false;

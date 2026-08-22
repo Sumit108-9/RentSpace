@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
 import useStore from '../../store/useStore';
+import api from '../../utils/api';
 
 const CATEGORIES = ['sofa', 'bed', 'table', 'chair', 'wardrobe', 'decor', 'dining', 'storage'];
 
@@ -23,8 +24,8 @@ const AdminProducts = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/products', { headers: { Authorization: `Bearer ${getToken()}` } });
-      const data = await res.json();
+      const response = await api.get('/admin/products');
+      const data = response.data;
       if (data.success) {
         setProducts(data.data || []);
       } else {
@@ -98,10 +99,10 @@ const AdminProducts = () => {
       isActive: form.isActive
     };
     try {
-      const url = editingId ? `/api/admin/products/${editingId}` : '/api/admin/products';
-      const method = editingId ? 'PUT' : 'POST';
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` }, body: JSON.stringify(body) });
-      const data = await res.json();
+      const response = editingId
+        ? await api.put(`/admin/products/${editingId}`, body)
+        : await api.post('/admin/products', body);
+      const data = response.data;
       if (!data.success) { setError(data.message || 'Failed to save'); setSaving(false); return; }
       clearUserProductCache(); // Clear user cache for immediate sync
       setShowModal(false);
@@ -113,8 +114,8 @@ const AdminProducts = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this product?')) return;
     try {
-      const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } });
-      const data = await res.json();
+      const response = await api.delete(`/admin/products/${id}`);
+      const data = response.data;
       if (data.success) {
         clearUserProductCache(); // Clear user cache for immediate sync
         fetchProducts();

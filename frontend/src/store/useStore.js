@@ -378,11 +378,11 @@ const useStore = create(
 
         set({ adminOrdersLoading: true, adminOrdersError: null });
         try {
-          const token = get().token || localStorage.getItem('token');
-          const res = await fetch('/api/admin/orders', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          const data = await res.json();
+          // #region agent log
+          fetch('http://127.0.0.1:7633/ingest/82148fb8-03cb-44ac-8ce0-01502e70d163',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ecd83c'},body:JSON.stringify({sessionId:'ecd83c',runId:'pre-fix',hypothesisId:'B',location:'useStore.js:fetchAdminOrders',message:'Fetching admin orders via api client',data:{endpoint:'/admin/orders'},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
+          const response = await api.get('/admin/orders');
+          const data = response.data;
           if (data.success) {
             set({ adminOrders: data.orders || [], adminOrdersLastFetch: Date.now() });
           } else {
@@ -398,13 +398,8 @@ const useStore = create(
 
       updateAdminOrderStatus: async (orderId, newStatus) => {
         try {
-          const token = get().token || localStorage.getItem('token');
-          const res = await fetch(`/api/admin/orders/${orderId}/status`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ status: newStatus })
-          });
-          const data = await res.json();
+          const response = await api.put(`/admin/orders/${orderId}/status`, { status: newStatus });
+          const data = response.data;
           if (data.success) {
             // Refresh orders after status update
             get().fetchAdminOrders(true);

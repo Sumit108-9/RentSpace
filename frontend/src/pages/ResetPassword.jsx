@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import api from '../utils/api';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -28,20 +29,15 @@ const ResetPassword = () => {
     }
     
     try {
-      const response = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword: password }),
-      });
-      if (response.ok) {
+      const response = await api.post('/auth/reset-password', { token, newPassword: password });
+      if (response.data?.success !== false) {
         setSuccess(true);
         setTimeout(() => navigate('/login'), 3000);
       } else {
-        const data = await response.json();
-        setError(data.message || 'Failed to reset password');
+        setError(response.data.message || 'Failed to reset password');
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.response?.data?.message || 'Network error. Please try again.');
     }
   };
 

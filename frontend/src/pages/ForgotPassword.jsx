@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../utils/api';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -12,20 +13,18 @@ const ForgotPassword = () => {
     setMessage('');
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+      // #region agent log
+      fetch('http://127.0.0.1:7633/ingest/82148fb8-03cb-44ac-8ce0-01502e70d163',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'ecd83c'},body:JSON.stringify({sessionId:'ecd83c',runId:'pre-fix',hypothesisId:'C',location:'ForgotPassword.jsx:handleSubmit',message:'Sending forgot-password via api client',data:{endpoint:'/auth/forgot-password'},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      const response = await api.post('/auth/forgot-password', { email });
+      const data = response.data;
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      if (data.success) {
         setStatus('success');
         setMessage(data.message || `Email sent successfully to the email- ${email}`);
       } else {
         setStatus('error');
-        if (response.status === 404 || data.message?.toLowerCase().includes('not found')) {
+        if (response.status === 404 || data?.message?.toLowerCase().includes('not found')) {
           setMessage('User not found');
         } else {
           setMessage(data.message || 'Something went wrong. Please try again.');
@@ -33,7 +32,13 @@ const ForgotPassword = () => {
       }
     } catch (err) {
       setStatus('error');
-      setMessage('Network error. Please try again.');
+      const statusCode = err.response?.status;
+      const msg = err.response?.data?.message;
+      if (statusCode === 404 || msg?.toLowerCase().includes('not found')) {
+        setMessage('User not found');
+      } else {
+        setMessage(msg || 'Network error. Please try again.');
+      }
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import api from '../utils/api';
 
 // ============================================
 // RentSpace Order Success Page
@@ -18,12 +19,8 @@ const OrderSuccess = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const response = await fetch(`/api/orders/${orderId}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        const data = await response.json();
+        const response = await api.get(`/orders/${orderId}`);
+        const data = response.data;
         if (data.success) {
           setOrder(data.order);
         }
