@@ -102,6 +102,27 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 
 
+// ❤️ ROOT ENDPOINT
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'RentSpace API Server',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      products: '/api/products',
+      orders: '/api/orders',
+      users: '/api/users',
+      admin: '/api/admin',
+      payment: '/api/payment',
+      cart: '/api/cart',
+      wishlist: '/api/wishlist'
+    },
+    documentation: 'See API_DOCUMENTATION.md for details'
+  });
+});
+
 // ❤️ HEALTH CHECK
 app.get('/api/health', (req, res) => {
   res.json({
