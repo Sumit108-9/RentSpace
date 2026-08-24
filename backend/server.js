@@ -59,7 +59,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
       "http://localhost:3000",
       "http://127.0.0.1:5173",
       "http://127.0.0.1:3000",
-      "https://rent-space-pi.vercel.app"
+      "https://rent-space-pi.vercel.app",
+      "https://rentspace-backend-ch9s.onrender.com"
     ];
 
 app.use(cors({
