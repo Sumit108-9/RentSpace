@@ -56,9 +56,15 @@ export const register = [
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       Otp.create({ email, otp })
         .then(() => sendVerificationEmail(email, otp))
-        .then(() => console.log('✅ Verification email sent to:', email))
+        .then((result) => {
+          if (result.success) {
+            console.log('✅ Verification email sent to:', email);
+          } else {
+            console.error('❌ Failed to send verification email:', result.error);
+          }
+        })
         .catch(emailError => {
-          console.error('Failed to send verification email:', emailError.message);
+          console.error('❌ Failed to send verification email:', emailError.message);
         });
     } catch (error) {
       next(error);
@@ -198,10 +204,16 @@ export const forgotPassword = async (req, res, next) => {
 
     // Send reset email
     try {
-      await sendPasswordResetEmail(user, resetToken);
-      console.log('Reset email sent successfully');
+      const emailResult = await sendPasswordResetEmail(user, resetToken);
+      if (emailResult.success) {
+        console.log('✅ Reset email sent successfully to:', user.email);
+      } else {
+        console.error('❌ Failed to send reset email:', emailResult.error);
+        console.error('   Email credentials may not be configured');
+      }
     } catch (emailError) {
-      console.error('Failed to send password reset email:', emailError.message);
+      console.error('❌ Failed to send password reset email:', emailError.message);
+      console.error('   Check EMAIL_USER and EMAIL_PASS environment variables');
       // Don't fail the request if email fails
     }
 
