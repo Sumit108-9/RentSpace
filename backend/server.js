@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 
 import connectDB from './config/db.js';
 import { createLogger } from './config/logger.js';
+import { verifyEmailConnection } from './config/email.config.js';
 
 import authRoutes from './routes/auth.routes.js';
 import googleAuthRoutes from './routes/googleAuth.routes.js';
@@ -161,14 +162,12 @@ const startServer = async () => {
     // Connect to database
     await connectDB();
 
+    // Verify email connection
+    await verifyEmailConnection();
+
     // Start HTTP server
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${PORT} ✅`);
-      
-      // Log email status
-      if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-        console.log(`📧 Email service ready ✅`);
-      }
     });
 
   } catch (error) {
